@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DataConcierge
 
-## Getting Started
+AI-powered business data assistant. Ask your business data anything in plain English.
 
-First, run the development server:
+## Quick Start (Development)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **Clone and install:**
+   ```bash
+   git clone https://github.com/Chhayly-and-AI/data-concierge.git
+   cd data-concierge
+   npm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Set up environment:**
+   ```bash
+   cp .env.local.example .env.local
+   # Edit .env.local with your database and Gemini API credentials
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Set up database:**
+   ```bash
+   psql $DATABASE_URL -f db/setup.sql
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **Load example client:**
+   ```bash
+   cd ingestion
+   python3 -m venv .venv && source .venv/bin/activate
+   pip install -r requirements.txt
+   python load.py ../clients/example --db-url $DATABASE_URL
+   python sync_config.py --clients-dir ../clients --db-url $DATABASE_URL
+   cd ..
+   ```
 
-## Learn More
+5. **Run the app:**
+   ```bash
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+6. **Open:** http://localhost:3000/example/login (password: `demo123`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Onboarding a New Client
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Create `clients/<client-id>/config.yaml` (see `clients/example/` for reference)
+2. Put their data files in `clients/<client-id>/raw/`
+3. Run: `cd ingestion && python load.py ../clients/<client-id>`
+4. Run: `python sync_config.py --clients-dir ../clients`
+5. Share the URL: `https://your-domain.com/<client-id>/login`
 
-## Deploy on Vercel
+## Deploy to Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Push to GitHub
+2. Import in Vercel
+3. Add environment variables: `DATABASE_URL`, `DATABASE_READONLY_URL`, `GEMINI_API_KEY`
+4. Deploy
