@@ -1,0 +1,21 @@
+customer_name,customer_email,product,category,quantity,price,total,date,status
+Alice Johnson,alice@example.com,Latte,coffee,2,5.50,11.00,2026-03-01,completed
+Bob Smith,bob@example.com,Croissant,pastry,1,4.00,4.00,2026-03-01,completed
+Alice Johnson,alice@example.com,Cappuccino,coffee,1,5.00,5.00,2026-03-02,completed
+Charlie Brown,charlie@example.com,Espresso,coffee,3,3.50,10.50,2026-03-03,completed
+Diana Prince,diana@example.com,Green Tea,tea,1,4.00,4.00,2026-03-03,completed
+Bob Smith,bob@example.com,Latte,coffee,1,5.50,5.50,2026-03-04,completed
+Eve Wilson,eve@example.com,Turkey Sandwich,sandwich,2,8.00,16.00,2026-03-05,completed
+Alice Johnson,alice@example.com,Latte,coffee,1,5.50,5.50,2026-03-06,completed
+Charlie Brown,charlie@example.com,Croissant,pastry,2,4.00,8.00,2026-03-07,completed
+Frank Lee,frank@example.com,Cappuccino,coffee,1,5.00,5.00,2026-03-08,completed
+Diana Prince,diana@example.com,Latte,coffee,2,5.50,11.00,2026-03-09,completed
+Bob Smith,bob@example.com,Espresso,coffee,1,3.50,3.50,2026-03-10,completed
+Alice Johnson,alice@example.com,Green Tea,tea,1,4.00,4.00,2026-03-11,completed
+Eve Wilson,eve@example.com,Croissant,pastry,3,4.00,12.00,2026-03-12,completed
+Charlie Brown,charlie@example.com,Latte,coffee,2,5.50,11.00,2026-03-13,completed
+Frank Lee,frank@example.com,Turkey Sandwich,sandwich,1,8.00,8.00,2026-03-14,completed
+Diana Prince,diana@example.com,Cappuccino,coffee,1,5.00,5.00,2026-03-15,completed
+Alice Johnson,alice@example.com,Espresso,coffee,2,3.50,7.00,2026-03-16,completed
+Bob Smith,bob@example.com,Latte,coffee,1,5.50,5.50,2026-03-17,completed
+Eve Wilson,eve@example.com,Green Tea,tea,2,4.00,8.00,2026-03-18,completed

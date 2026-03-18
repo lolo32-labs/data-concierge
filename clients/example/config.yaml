@@ -1,0 +1,33 @@
+client_id: example
+name: "Example Coffee Shop"
+database_schema: client_example
+password: "demo123"
+suggested_questions:
+  - "What were my total sales this month?"
+  - "Who are my top 5 customers?"
+  - "What's my best-selling product?"
+  - "Compare this week to last week"
+  - "Which day of the week has the most orders?"
+dashboard_metrics:
+  - label: Revenue
+    query: "SELECT COALESCE(SUM(total), 0) FROM orders WHERE date >= date_trunc('month', CURRENT_DATE)"
+    format: currency
+    compare_query: "SELECT COALESCE(SUM(total), 0) FROM orders WHERE date >= date_trunc('month', CURRENT_DATE) - interval '1 month' AND date < date_trunc('month', CURRENT_DATE)"
+  - label: Orders
+    query: "SELECT COUNT(*) FROM orders WHERE date >= date_trunc('month', CURRENT_DATE)"
+    format: number
+    compare_query: "SELECT COUNT(*) FROM orders WHERE date >= date_trunc('month', CURRENT_DATE) - interval '1 month' AND date < date_trunc('month', CURRENT_DATE)"
+  - label: Customers
+    query: "SELECT COUNT(DISTINCT customer_id) FROM orders WHERE date >= date_trunc('month', CURRENT_DATE)"
+    format: number
+    compare_query: "SELECT COUNT(DISTINCT customer_id) FROM orders WHERE date >= date_trunc('month', CURRENT_DATE) - interval '1 month' AND date < date_trunc('month', CURRENT_DATE)"
+schema_description: |
+  Tables:
+  - customers (id, name, email, phone)
+  - products (id, name, category, price)
+  - orders (id, customer_id, date, total, status)
+  - order_items (id, order_id, product_id, quantity, price)
+business_context: |
+  Example Coffee Shop is a local coffee shop.
+  "Orders" are customer purchases. "Products" are menu items (coffee, pastries, etc).
+  Categories include: coffee, tea, pastry, sandwich.
