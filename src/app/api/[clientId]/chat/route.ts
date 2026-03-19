@@ -82,8 +82,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ answer, rowCount: rows.length });
   } catch (error) {
     console.error("Chat error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
     return NextResponse.json({
       answer: "I'm temporarily unavailable. Please try again in a minute.",
+      debug: msg,
     });
   }
 }
