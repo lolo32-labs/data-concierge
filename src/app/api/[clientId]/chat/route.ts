@@ -85,7 +85,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const msg = error instanceof Error ? error.message : String(error);
     return NextResponse.json({
       answer: "I'm temporarily unavailable. Please try again in a minute.",
-      debug: msg,
     });
   }
 }
