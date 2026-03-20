@@ -23,7 +23,7 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        router.push(`/${clientId}`);
+        router.push(`/${clientId}/onboarding`);
       } else {
         setError("Incorrect password");
       }
