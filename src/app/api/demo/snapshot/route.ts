@@ -1,7 +1,18 @@
 import { NextResponse } from "next/server";
-import { executeClientQuery } from "@/lib/db";
+import { Pool, type QueryResultRow } from "pg";
 
-const DEMO_SCHEMA = "client_shopify_demo";
+// Use a dedicated pool for demo queries to avoid connection contention
+const pool = new Pool({
+  connectionString: process.env.DATABASE_READONLY_URL || process.env.DATABASE_URL,
+  max: 3,
+});
+
+async function demoQuery<T extends QueryResultRow = QueryResultRow>(sql: string): Promise<T[]> {
+  const result = await pool.query<T>(sql);
+  return result.rows;
+}
+
+const S = "client_shopify_demo"; // schema prefix
 
 interface ProductRow {
   name: string;
@@ -61,10 +72,10 @@ function calculateHealthScore(params: {
 
 export async function GET() {
   try {
-    // Compute the cutoff date once as a subquery reference — avoids CURRENT_DATE
-    // All queries use relative dates derived from the max date in the orders table.
-    const recentFilter = `date >= (SELECT MAX(date)::date - interval '30 days' FROM orders)`;
-    const validStatuses = `status NOT IN ('refunded', 'cancelled')`;
+    // All queries use fully qualified table names (no search_path needed)
+    // Date filter: last 30 days relative to max date in data (avoids CURRENT_DATE staleness)
+    const cutoff = `(SELECT MAX(date)::date - interval '30 days' FROM ${S}.orders)`;
+    const valid = `status NOT IN ('refunded', 'cancelled')`;
 
     const [
       revenueRows,
@@ -76,104 +87,14 @@ export async function GET() {
       channelRows,
       dateRangeRows,
     ] = await Promise.all([
-      // 1. Revenue (exclude refunded/cancelled)
-      executeClientQuery(
-        DEMO_SCHEMA,
-        `SELECT COALESCE(SUM(subtotal), 0)::text AS value
-         FROM orders
-         WHERE ${recentFilter}
-           AND ${validStatuses}`
-      ),
-
-      // 2. COGS via order_items joined to valid orders
-      executeClientQuery(
-        DEMO_SCHEMA,
-        `SELECT COALESCE(SUM(oi.quantity * oi.unit_cost), 0)::text AS value
-         FROM order_items oi
-         JOIN orders o ON o.id = oi.order_id
-         WHERE o.date >= (SELECT MAX(date)::date - interval '30 days' FROM orders)
-           AND o.status NOT IN ('refunded', 'cancelled')`
-      ),
-
-      // 3. Fees: shipping + platform fees + discounts + refunds
-      executeClientQuery(
-        DEMO_SCHEMA,
-        `SELECT COALESCE(SUM(shipping_cost + shopify_fee + payment_fee + discount + refund), 0)::text AS value
-         FROM orders
-         WHERE ${recentFilter}
-           AND ${validStatuses}`
-      ),
-
-      // 4. Ad spend — uses ad_spend.date, subquery still references orders for relative range
-      executeClientQuery(
-        DEMO_SCHEMA,
-        `SELECT COALESCE(SUM(spend), 0)::text AS value
-         FROM ad_spend
-         WHERE date >= (SELECT MAX(date)::date - interval '30 days' FROM orders)`
-      ),
-
-      // 5. Order count (exclude refunded/cancelled)
-      executeClientQuery(
-        DEMO_SCHEMA,
-        `SELECT COUNT(*)::text AS value
-         FROM orders
-         WHERE ${recentFilter}
-           AND ${validStatuses}`
-      ),
-
-      // 6. Top products by profit, sorted DESC
-      executeClientQuery(
-        DEMO_SCHEMA,
-        `SELECT
-           p.name,
-           COALESCE(SUM(oi.quantity * oi.unit_price), 0)::text AS revenue,
-           COALESCE(SUM(oi.quantity * oi.unit_cost), 0)::text  AS cogs,
-           COALESCE(
-             SUM(oi.quantity * oi.unit_price) - SUM(oi.quantity * oi.unit_cost),
-             0
-           )::text AS profit,
-           CASE
-             WHEN SUM(oi.quantity * oi.unit_price) > 0 THEN
-               ROUND(
-                 (SUM(oi.quantity * oi.unit_price) - SUM(oi.quantity * oi.unit_cost))
-                 / SUM(oi.quantity * oi.unit_price) * 100,
-                 1
-               )::text
-             ELSE '0'
-           END AS margin
-         FROM order_items oi
-         JOIN orders   o ON o.id = oi.order_id
-         JOIN products p ON p.id = oi.product_id
-         WHERE o.date >= (SELECT MAX(date)::date - interval '30 days' FROM orders)
-           AND o.status NOT IN ('refunded', 'cancelled')
-         GROUP BY p.id, p.name
-         ORDER BY (SUM(oi.quantity * oi.unit_price) - SUM(oi.quantity * oi.unit_cost)) DESC`
-      ),
-
-      // 7. Revenue and order count by channel
-      executeClientQuery(
-        DEMO_SCHEMA,
-        `SELECT
-           channel,
-           COALESCE(SUM(subtotal), 0)::text AS revenue,
-           COUNT(*)::text                   AS orders
-         FROM orders
-         WHERE ${recentFilter}
-           AND ${validStatuses}
-         GROUP BY channel
-         ORDER BY SUM(subtotal) DESC`
-      ),
-
-      // 8. Actual date range of the filtered orders
-      executeClientQuery(
-        DEMO_SCHEMA,
-        `SELECT
-           MIN(date)::date::text AS start,
-           MAX(date)::date::text AS end
-         FROM orders
-         WHERE ${recentFilter}
-           AND ${validStatuses}`
-      ),
+      demoQuery(`SELECT COALESCE(SUM(subtotal), 0)::text AS value FROM ${S}.orders WHERE date >= ${cutoff} AND ${valid}`),
+      demoQuery(`SELECT COALESCE(SUM(oi.quantity * oi.unit_cost), 0)::text AS value FROM ${S}.order_items oi JOIN ${S}.orders o ON o.id = oi.order_id WHERE o.date >= ${cutoff} AND o.status NOT IN ('refunded', 'cancelled')`),
+      demoQuery(`SELECT COALESCE(SUM(shipping_cost + shopify_fee + payment_fee + discount + refund), 0)::text AS value FROM ${S}.orders WHERE date >= ${cutoff} AND ${valid}`),
+      demoQuery(`SELECT COALESCE(SUM(spend), 0)::text AS value FROM ${S}.ad_spend WHERE date >= ${cutoff}`),
+      demoQuery(`SELECT COUNT(*)::text AS value FROM ${S}.orders WHERE date >= ${cutoff} AND ${valid}`),
+      demoQuery(`SELECT p.name, COALESCE(SUM(oi.quantity * oi.unit_price), 0)::text AS revenue, COALESCE(SUM(oi.quantity * oi.unit_cost), 0)::text AS cogs, COALESCE(SUM(oi.quantity * oi.unit_price) - SUM(oi.quantity * oi.unit_cost), 0)::text AS profit, CASE WHEN SUM(oi.quantity * oi.unit_price) > 0 THEN ROUND((SUM(oi.quantity * oi.unit_price) - SUM(oi.quantity * oi.unit_cost)) / SUM(oi.quantity * oi.unit_price) * 100, 1)::text ELSE '0' END AS margin FROM ${S}.order_items oi JOIN ${S}.orders o ON o.id = oi.order_id JOIN ${S}.products p ON p.id = oi.product_id WHERE o.date >= ${cutoff} AND o.status NOT IN ('refunded', 'cancelled') GROUP BY p.id, p.name ORDER BY (SUM(oi.quantity * oi.unit_price) - SUM(oi.quantity * oi.unit_cost)) DESC`),
+      demoQuery(`SELECT channel, COALESCE(SUM(subtotal), 0)::text AS revenue, COUNT(*)::text AS orders FROM ${S}.orders WHERE date >= ${cutoff} AND ${valid} GROUP BY channel ORDER BY SUM(subtotal) DESC`),
+      demoQuery(`SELECT MIN(date)::date::text AS start, MAX(date)::date::text AS end FROM ${S}.orders WHERE date >= ${cutoff} AND ${valid}`),
     ]);
 
     // Parse scalar values
