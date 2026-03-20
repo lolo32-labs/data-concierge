@@ -7,16 +7,39 @@ export default function SuggestedQuestions({ questions, onSelect }: SuggestedQue
   return (
     <div className="flex flex-col items-center justify-center gap-4 flex-1">
       <div className="text-center">
-        <p className="text-2xl mb-1">👋</p>
-        <p className="text-gray-300 font-medium">What would you like to know?</p>
-        <p className="text-gray-500 text-sm mt-1">Ask anything, or try one of these:</p>
+        <p className="text-2xl mb-1">&#x1f44b;</p>
+        <p
+          className="font-medium text-[15px]"
+          style={{ color: "var(--text-primary)" }}
+        >
+          What would you like to know?
+        </p>
+        <p
+          className="text-sm mt-1"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          Ask anything, or try one of these:
+        </p>
       </div>
       <div className="flex flex-wrap gap-2 justify-center max-w-md">
         {questions.map((q) => (
           <button
             key={q}
             onClick={() => onSelect(q)}
-            className="bg-gray-900 border border-gray-700 px-3 py-2 rounded-full text-xs text-gray-300 hover:border-gray-500 hover:text-white transition-colors cursor-pointer"
+            className="px-3 py-2 rounded-full text-xs transition-colors cursor-pointer"
+            style={{
+              backgroundColor: "var(--surface)",
+              border: "1px solid var(--border)",
+              color: "var(--text-secondary)",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--brand-primary)";
+              (e.currentTarget as HTMLButtonElement).style.color = "var(--text-primary)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border)";
+              (e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary)";
+            }}
           >
             {q}
           </button>
