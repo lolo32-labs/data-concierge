@@ -18,17 +18,22 @@ interface AdSpend {
   amount: number;
 }
 
-// ── Demo product data ─────────────────────────────────────────────────────────
+// ── Fallback product data (matches client_shopify_demo schema) ────────────────
 
-const DEMO_PRODUCTS: ProductCost[] = [
-  { name: 'Classic Wool Beanie', price: 38, cost: 11 },
-  { name: 'Merino Crew Neck Sweater', price: 120, cost: 42 },
-  { name: 'Leather Cord Bracelet', price: 28, cost: 5 },
-  { name: 'Canvas Tote Bag', price: 45, cost: 12 },
-  { name: 'Soy Candle — Cedar', price: 32, cost: 8 },
-  { name: 'Hand-Poured Soap Set', price: 24, cost: 6 },
-  { name: 'Linen Face Towel', price: 19, cost: 5 },
-  { name: 'Bamboo Travel Cup', price: 42, cost: 14 },
+const FALLBACK_PRODUCTS: ProductCost[] = [
+  { name: 'Zip-Up Jacket', price: 79.99, cost: 24 },
+  { name: 'Classic Hoodie', price: 64.99, cost: 18 },
+  { name: 'Oversized Crew', price: 54.99, cost: 15 },
+  { name: 'Weekend Joggers', price: 49.99, cost: 14 },
+  { name: 'Performance Polo', price: 44.99, cost: 12 },
+  { name: 'Linen Shorts', price: 39.99, cost: 11 },
+  { name: 'Slim Fit Tee', price: 34.99, cost: 8.5 },
+  { name: 'Drawstring Shorts', price: 34.99, cost: 9 },
+  { name: 'Canvas Tote', price: 29.99, cost: 4 },
+  { name: 'Graphic Tee - Sunset', price: 29.99, cost: 7 },
+  { name: 'Retro Cap', price: 24.99, cost: 5.5 },
+  { name: 'Cozy Beanie', price: 19.99, cost: 3.5 },
+  { name: 'Logo Socks 3-Pack', price: 14.99, cost: 2.5 },
 ];
 
 const AD_PLATFORMS: AdSpend[] = [
@@ -181,7 +186,7 @@ function NavHeader({
 // ── Section: Product Costs ────────────────────────────────────────────────────
 
 function ProductCostsSection({ onSave }: { onSave: () => void }) {
-  const [products, setProducts] = useState<ProductCost[]>(DEMO_PRODUCTS);
+  const [products, setProducts] = useState<ProductCost[]>(FALLBACK_PRODUCTS);
   const [bulkPercent, setBulkPercent] = useState('');
   const [shippingCost, setShippingCost] = useState('4.50');
 
