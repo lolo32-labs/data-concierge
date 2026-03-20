@@ -88,7 +88,7 @@ export default function ChatArea({ clientId, suggestedQuestions }: ChatAreaProps
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about your business..."
+            placeholder="Ask about your profit..."
             disabled={loading}
             className="flex-1 bg-gray-900 border border-gray-700 rounded-full px-5 py-3 text-sm text-gray-100 placeholder-gray-500 outline-none focus:border-gray-500"
           />

@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DataConcierge",
-  description: "Ask your business data anything",
+  title: "ProfitSight",
+  description: "Your Shopify Profit Advisor",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

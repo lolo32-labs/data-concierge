@@ -38,8 +38,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl mx-auto mb-4" />
-          <h1 className="text-xl font-semibold text-gray-100">DataConcierge</h1>
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl mx-auto mb-4" />
+          <h1 className="text-xl font-semibold text-gray-100">ProfitSight</h1>
           <p className="text-sm text-gray-500 mt-1">Enter your password to continue</p>
         </div>
 

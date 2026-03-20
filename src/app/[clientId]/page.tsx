@@ -29,8 +29,8 @@ export default async function ClientPage({ params }: PageProps) {
       <div className="flex flex-col w-full">
         <header className="flex items-center justify-between px-5 py-3 border-b border-gray-800">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-purple-600 rounded-md" />
-            <span className="font-semibold text-sm">DataConcierge</span>
+            <div className="w-7 h-7 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-md" />
+            <span className="font-semibold text-sm">ProfitSight</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-gray-400">
             <span>{config.name}</span>
