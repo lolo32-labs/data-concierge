@@ -45,8 +45,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const rawSQL = await generateSQL(question, config.schema_description, config.business_context);
 
     // Step 2: Validate SQL
+    console.log("Generated SQL:", rawSQL);
     const validation = validateSQL(rawSQL);
     if (!validation.valid) {
+      console.error("SQL validation failed:", validation.error, "SQL:", rawSQL);
       return NextResponse.json({
         answer: "I couldn't generate a query for that. Try rephrasing your question.",
       });
