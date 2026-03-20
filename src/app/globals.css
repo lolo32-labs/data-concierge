@@ -1,26 +1,232 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================================
+   ProfitSight Multi-Theme System
+   All components use CSS custom properties — never hardcoded colors.
+   Themes are applied via data-theme attribute on <html>.
+   ============================================================ */
+
+/* --- Default / Classic Theme (Shopify Native Elevated) --- */
+:root,
+[data-theme="classic"] {
+  --bg: #F6F6F7;
+  --bg-subtle: #EDEEEF;
+  --surface: #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --border: #E1E3E5;
+  --border-light: #EDEEEF;
+
+  --text-primary: #202223;
+  --text-secondary: #6D7175;
+  --text-tertiary: #8C9196;
+  --text-inverse: #FFFFFF;
+
+  --brand-primary: #008060;
+  --brand-primary-hover: #006E52;
+  --brand-primary-subtle: #E3F1DF;
+  --brand-secondary: #1A3C34;
+
+  --color-success: #008060;
+  --color-success-subtle: #E3F1DF;
+  --color-danger: #D72C0D;
+  --color-danger-subtle: #FFF4F4;
+  --color-warning: #B98900;
+  --color-warning-subtle: #FFF8DB;
+  --color-info: #005BD3;
+  --color-info-subtle: #EBF3FF;
+
+  --shadow-sm: 0 1px 0 rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 6px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+
+  --font-display: 'General Sans', -apple-system, sans-serif;
+  --font-body: 'General Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* --- Midnight Theme (Deep Sky + Warm Glow) --- */
+[data-theme="midnight"] {
+  --bg: #0A0E1A;
+  --bg-subtle: #0F1425;
+  --surface: #111827;
+  --surface-raised: #1A2236;
+  --border: #1E2A3F;
+  --border-light: #161E30;
+
+  --text-primary: #E2E8F0;
+  --text-secondary: #7A8599;
+  --text-tertiary: #4A5568;
+  --text-inverse: #0A0E1A;
+
+  --brand-primary: #E8A838;
+  --brand-primary-hover: #D4943A;
+  --brand-primary-subtle: rgba(232,168,56,0.15);
+  --brand-secondary: #3B82F6;
+
+  --color-success: #34D399;
+  --color-success-subtle: rgba(52,211,153,0.1);
+  --color-danger: #EF4444;
+  --color-danger-subtle: rgba(239,68,68,0.1);
+  --color-warning: #FBBF24;
+  --color-warning-subtle: rgba(251,191,36,0.1);
+  --color-info: #60A5FA;
+  --color-info-subtle: rgba(96,165,250,0.1);
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-lg: 0 4px 20px rgba(0,0,0,0.5);
+
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* --- Studio Theme (White Canvas + Terracotta) --- */
+[data-theme="studio"] {
+  --bg: #FAFAFA;
+  --bg-subtle: #F0F0F0;
+  --surface: #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --border: #E5E5E5;
+  --border-light: #F0F0F0;
+
+  --text-primary: #0A0A0A;
+  --text-secondary: #737373;
+  --text-tertiary: #A3A3A3;
+  --text-inverse: #FFFFFF;
+
+  --brand-primary: #D4634B;
+  --brand-primary-hover: #BF5640;
+  --brand-primary-subtle: #FDF2EF;
+  --brand-secondary: #0A0A0A;
+
+  --color-success: #16A34A;
+  --color-success-subtle: #F0FFF4;
+  --color-danger: #DC2626;
+  --color-danger-subtle: #FFF5F5;
+  --color-warning: #D97706;
+  --color-warning-subtle: #FFFBEB;
+  --color-info: #2563EB;
+  --color-info-subtle: #EFF6FF;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.08);
+
+  --font-display: 'Cabinet Grotesk', 'Satoshi', -apple-system, sans-serif;
+  --font-body: 'Satoshi', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-full: 9999px;
 }
 
+/* --- Terminal Theme (Dark Precision + Neon Mint) --- */
+[data-theme="terminal"] {
+  --bg: #0A0A0A;
+  --bg-subtle: #111111;
+  --surface: #141414;
+  --surface-raised: #1C1C1C;
+  --border: #262626;
+  --border-light: #1A1A1A;
+
+  --text-primary: #E5E5E5;
+  --text-secondary: #6B6B6B;
+  --text-tertiary: #444444;
+  --text-inverse: #0A0A0A;
+
+  --brand-primary: #00FFB2;
+  --brand-primary-hover: #00E6A0;
+  --brand-primary-subtle: rgba(0,255,178,0.1);
+  --brand-secondary: #E5E5E5;
+
+  --color-success: #00FFB2;
+  --color-success-subtle: rgba(0,255,178,0.08);
+  --color-danger: #FF4D4D;
+  --color-danger-subtle: rgba(255,77,77,0.08);
+  --color-warning: #FFD60A;
+  --color-warning-subtle: rgba(255,214,10,0.08);
+  --color-info: #4DA6FF;
+  --color-info-subtle: rgba(77,166,255,0.08);
+
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: 0 0 1px rgba(255,255,255,0.1);
+
+  --font-display: 'Geist', -apple-system, sans-serif;
+  --font-body: 'Geist', -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-full: 9999px;
+}
+
+/* --- Heritage Theme (Parchment + Sapphire) --- */
+[data-theme="heritage"] {
+  --bg: #F7F3ED;
+  --bg-subtle: #EDE8DF;
+  --surface: #FFFDF9;
+  --surface-raised: #FFFFFF;
+  --border: #E5DFD4;
+  --border-light: #EDE8DF;
+
+  --text-primary: #2D2A26;
+  --text-secondary: #8C857A;
+  --text-tertiary: #B5AFA5;
+  --text-inverse: #FFFFFF;
+
+  --brand-primary: #2843B2;
+  --brand-primary-hover: #1E3599;
+  --brand-primary-subtle: #EEF1FB;
+  --brand-secondary: #1A1A1A;
+
+  --color-success: #2E7D32;
+  --color-success-subtle: #F1F8E9;
+  --color-danger: #C62828;
+  --color-danger-subtle: #FFF5F5;
+  --color-warning: #E65100;
+  --color-warning-subtle: #FFF8E1;
+  --color-info: #1565C0;
+  --color-info-subtle: #E8F0FE;
+
+  --shadow-sm: 0 1px 3px rgba(45,42,38,0.04);
+  --shadow-md: 0 2px 8px rgba(45,42,38,0.06);
+  --shadow-lg: 0 4px 16px rgba(45,42,38,0.08);
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Source Sans 3', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-full: 9999px;
+}
+
+/* ============================================================
+   Base Styles
+   ============================================================ */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
 }
