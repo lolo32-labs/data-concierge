@@ -21,8 +21,15 @@ function formatValue(value: number | null, format: string): string {
   return value.toLocaleString();
 }
 
+function isMonthComplete(): boolean {
+  const today = new Date();
+  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  return today.getDate() >= lastDay - 2; // Consider complete if within last 2 days
+}
+
 function getTrend(current: number | null, previous: number | null): { label: string; color: string } {
   if (current === null || previous === null || previous === 0) return { label: "", color: "text-gray-500" };
+  if (!isMonthComplete()) return { label: "Month in progress", color: "text-gray-500" };
   const pct = ((current - previous) / previous) * 100;
   if (pct > 0) return { label: `↑ ${pct.toFixed(0)}% vs last period`, color: "text-green-400" };
   if (pct < 0) return { label: `↓ ${Math.abs(pct).toFixed(0)}% vs last period`, color: "text-red-400" };

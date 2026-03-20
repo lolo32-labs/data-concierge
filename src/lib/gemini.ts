@@ -20,17 +20,22 @@ ${schemaDescription}
 BUSINESS CONTEXT:
 ${businessContext}
 
-RULES:
+CRITICAL CALCULATION RULES:
+- "Real profit" or "net profit" = Revenue (SUM of subtotal from orders) MINUS COGS (SUM of unit_cost * quantity from order_items) MINUS Fees (SUM of shipping_cost + shopify_fee + payment_fee from orders) MINUS Discounts (SUM of discount from orders) MINUS Refunds (SUM of refund from orders) MINUS Ad Spend (SUM of spend from ad_spend for the same date range).
+- "Gross profit" = Revenue MINUS COGS only.
+- "Margin" = (unit_price - unit_cost) / unit_price * 100.
+- When calculating net profit that includes ad spend, use a subquery for ad_spend since it's a separate table.
+- Always filter by date >= date_trunc('month', CURRENT_DATE) for "this month" questions.
+- Exclude orders with status = 'refunded' or 'cancelled' from profit calculations unless specifically asked.
+- When showing products, show the TOP 5 by default unless the user asks for more or fewer.
+
+SQL GENERATION RULES:
 - Generate ONLY a single SELECT query. No INSERT, UPDATE, DELETE, DROP, or any other statement.
 - Do NOT include any explanation, just the raw SQL.
 - Do NOT wrap in code fences.
 - Do NOT include a semicolon at the end.
-- Use appropriate aggregations (SUM, COUNT, AVG) when the question asks for totals or counts.
-- Use appropriate date functions for time-based questions.
-- "This month" means date >= date_trunc('month', CURRENT_DATE).
 - Reference tables by their short names (e.g. "orders", "products"), not with schema prefixes.
-- For profit calculations, use subqueries or JOINs to combine data from multiple tables.
-- Always generate a query even if it requires multiple JOINs. Never refuse.
+- Always generate a query even if it requires multiple JOINs or subqueries. Never refuse.
 
 USER QUESTION: ${question}
 
@@ -51,24 +56,34 @@ export async function formatAnswer(
   rows: Record<string, unknown>[],
   businessContext: string
 ): Promise<string> {
-  const prompt = `You are ProfitSight, a friendly and insightful Shopify profit advisor. You speak like a smart financial co-pilot — clear, direct, and actionable.
+  const today = new Date().toISOString().split("T")[0];
+  const monthStart = today.substring(0, 7) + "-01";
+
+  const prompt = `You are ProfitSight, a Shopify profit advisor. You are precise, neutral, and actionable — like a trusted CFO, not a cheerful chatbot. Never sugarcoat bad numbers.
 
 BUSINESS CONTEXT:
 ${businessContext}
+
+Today's date: ${today}
+Current month range: ${monthStart} to ${today} (month in progress)
 
 The user asked: "${question}"
 
 Here are the query results (JSON):
 ${JSON.stringify(rows, null, 2)}
 
-RESPONSE RULES:
-- Lead with the key number in bold (e.g. "Your real profit this month is **$17,250**").
-- Add 1-2 sentences of insight or context after the number.
-- If the data is tabular (multiple products, channels, etc.), format as a clean markdown table.
-- Use bold for important numbers and percentages.
-- If you spot something concerning (negative margins, high ad spend vs low returns), flag it as a friendly heads-up.
-- Keep it under 150 words. Be concise and actionable.
-- Do NOT say "based on the data" or "according to the query results" — just give the answer naturally.`;
+RESPONSE FORMAT RULES:
+1. **Lead with the key number in bold** (e.g. "Your net profit for March 1-20 is **$17,250**").
+2. **Always state the date range** (e.g. "March 1-20, 2026").
+3. **For profit questions, show the waterfall breakdown:**
+   Revenue: $X → minus COGS: $X → minus Fees: $X → minus Ad Spend: $X = **Net Profit: $X**
+   (Use a simple list format, not a table, for the waterfall.)
+4. **For tabular data** (products, channels), use a clean markdown table with columns aligned. Show TOP 5 rows. If there are more, say "Showing top 5 of N."
+5. **End with one actionable recommendation** — something specific the merchant could do based on this data.
+6. **If numbers look concerning** (negative margins, rising costs, declining trends), flag it directly. Do not call bad results "solid" or "healthy."
+7. Keep responses under 200 words. Be concise.
+8. Do NOT say "based on the data" or "according to the query" — speak naturally.
+9. Use bold for key numbers and percentages throughout.`;
 
   const result = await model.generateContent(prompt);
   return result.response.text().trim();

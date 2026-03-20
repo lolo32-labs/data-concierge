@@ -1,4 +1,5 @@
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface MessageBubbleProps {
   role: "user" | "assistant";
@@ -21,6 +22,7 @@ export default function MessageBubble({ role, content }: MessageBubbleProps) {
           content
         ) : (
           <Markdown
+            remarkPlugins={[remarkGfm]}
             components={{
               p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
               strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
