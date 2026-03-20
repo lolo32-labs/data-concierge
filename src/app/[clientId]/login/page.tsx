@@ -35,12 +35,25 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ backgroundColor: 'var(--bg)' }}
+    >
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl mx-auto mb-4" />
-          <h1 className="text-xl font-semibold text-gray-100">ProfitSight</h1>
-          <p className="text-sm text-gray-500 mt-1">Enter your password to continue</p>
+          <div
+            className="w-12 h-12 rounded-xl mx-auto mb-4"
+            style={{ background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))' }}
+          />
+          <h1
+            className="text-xl font-semibold"
+            style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}
+          >
+            ProfitSight
+          </h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+            Enter your password to continue
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -49,14 +62,38 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-sm text-gray-100 placeholder-gray-500 outline-none focus:border-gray-500"
+            className="w-full rounded-lg px-4 py-3 text-sm outline-none"
+            style={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              borderRadius: 'var(--radius-md)',
+              fontFamily: 'var(--font-body)',
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = 'var(--brand-primary)';
+              e.currentTarget.style.boxShadow = '0 0 0 3px var(--brand-primary-subtle)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
             autoFocus
           />
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && (
+            <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>
+          )}
           <button
             type="submit"
             disabled={loading || !password}
-            className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 text-white rounded-lg py-3 text-sm font-medium transition-colors cursor-pointer disabled:cursor-not-allowed"
+            className="w-full rounded-lg py-3 text-sm font-semibold transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+            style={{
+              backgroundColor: 'var(--brand-primary)',
+              color: 'var(--text-inverse)',
+              borderRadius: 'var(--radius-md)',
+              border: 'none',
+              fontFamily: 'var(--font-body)',
+            }}
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
