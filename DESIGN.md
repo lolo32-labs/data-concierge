@@ -159,7 +159,7 @@ Every theme MUST define all of these variables. Components reference ONLY these 
 }
 ```
 
-**Font loading:** Google Fonts — `General Sans:wght@400;500;600;700`
+**Font loading:** Fontshare CDN — `General Sans` (not on Google Fonts, use https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap)
 **Logo mark:** Solid `--brand-primary` with rounded-lg
 
 ---
@@ -268,7 +268,7 @@ Every theme MUST define all of these variables. Components reference ONLY these 
 }
 ```
 
-**Font loading:** Google Fonts — `Satoshi:wght@400;500;700` (or CDN for Cabinet Grotesk)
+**Font loading:** Fontshare CDN — `Cabinet Grotesk` + `Satoshi` (not on Google Fonts, use https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&f[]=satoshi@400,500,700&display=swap)
 **Logo mark:** Solid `--brand-primary` with rounded-md
 **Signature:** Heavy `font-weight: 800` on display text, `letter-spacing: -0.03em`
 
