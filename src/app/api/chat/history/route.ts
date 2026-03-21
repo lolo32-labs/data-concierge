@@ -1,6 +1,7 @@
 // GET /api/chat/history — Load chat history for the authenticated store.
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth-config";
+import { resolveStoreId } from "@/lib/resolve-store";
 import { pool } from "@/lib/pool";
 
 export async function GET() {
@@ -8,7 +9,8 @@ export async function GET() {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!session.user.storeId) {
+  const storeId = await resolveStoreId(session);
+  if (!storeId) {
     return NextResponse.json({ noStore: true, error: "No store connected" }, { status: 200 });
   }
 
@@ -18,7 +20,7 @@ export async function GET() {
      WHERE store_id = $1
      ORDER BY created_at ASC
      LIMIT 100`,
-    [session.user.storeId]
+    [storeId]
   );
 
   return NextResponse.json({ messages: result.rows });

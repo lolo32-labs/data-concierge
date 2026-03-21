@@ -2,6 +2,7 @@
 // Accepts array of { variantId, costPerUnit } pairs.
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth-config";
+import { resolveStoreId } from "@/lib/resolve-store";
 import { pool } from "@/lib/pool";
 
 export async function POST(request: Request) {
@@ -9,7 +10,8 @@ export async function POST(request: Request) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!session.user.storeId) {
+  const storeId = await resolveStoreId(session);
+  if (!storeId) {
     return NextResponse.json({ noStore: true, error: "No store connected" }, { status: 200 });
   }
 
@@ -20,8 +22,6 @@ export async function POST(request: Request) {
   if (!entries || !Array.isArray(entries)) {
     return NextResponse.json({ error: "entries array required" }, { status: 400 });
   }
-
-  const storeId = session.user.storeId;
   const client = await pool.connect();
 
   try {

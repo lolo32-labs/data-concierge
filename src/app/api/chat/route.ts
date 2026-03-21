@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { auth } from "@/lib/auth-config";
+import { resolveStoreId } from "@/lib/resolve-store";
 import { pool, readonlyPool } from "@/lib/pool";
 import { CLASSIFY_PROMPT, TEMPLATE_MAP } from "@/lib/query-templates";
 
@@ -12,7 +13,8 @@ export async function POST(request: Request) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!session.user.storeId) {
+  const storeId = await resolveStoreId(session);
+  if (!storeId) {
     return NextResponse.json({ noStore: true, error: "No store connected" }, { status: 200 });
   }
 
@@ -20,8 +22,6 @@ export async function POST(request: Request) {
   if (!message?.trim()) {
     return NextResponse.json({ error: "Message required" }, { status: 400 });
   }
-
-  const storeId = session.user.storeId;
 
   try {
     // Step 1: Classify intent

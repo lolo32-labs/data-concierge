@@ -2,6 +2,7 @@
 // Used by onboarding (top 10) and settings (all).
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth-config";
+import { resolveStoreId } from "@/lib/resolve-store";
 import { pool } from "@/lib/pool";
 
 export async function GET(request: Request) {
@@ -9,7 +10,8 @@ export async function GET(request: Request) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!session.user.storeId) {
+  const storeId = await resolveStoreId(session);
+  if (!storeId) {
     return NextResponse.json({ noStore: true, error: "No store connected" }, { status: 200 });
   }
 
@@ -38,7 +40,7 @@ export async function GET(request: Request) {
      WHERE p.store_id = $1 AND p.status = 'active'
      ORDER BY p.title, v.title
      LIMIT $2`,
-    [session.user.storeId, limit]
+    [storeId, limit]
   );
 
   // Group by product

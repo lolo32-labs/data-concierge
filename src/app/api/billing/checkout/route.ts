@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { auth } from "@/lib/auth-config";
+import { resolveStoreId } from "@/lib/resolve-store";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -11,8 +12,13 @@ function getStripe() {
 
 export async function POST() {
   const session = await auth();
-  if (!session?.user?.storeId || !session?.user?.email) {
+  if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const storeId = await resolveStoreId(session);
+  if (!storeId) {
+    return NextResponse.json({ noStore: true, error: "No store connected" }, { status: 200 });
   }
 
   const priceId = process.env.STRIPE_PRICE_ID;
@@ -27,14 +33,14 @@ export async function POST() {
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: {
         trial_period_days: 14,
-        metadata: { storeId: session.user.storeId },
+        metadata: { storeId },
       },
       customer_email: session.user.email,
       success_url: `${process.env.AUTH_URL}/dashboard?billing=success`,
       cancel_url: `${process.env.AUTH_URL}/dashboard?billing=cancelled`,
       metadata: {
         userId: session.user.id,
-        storeId: session.user.storeId,
+        storeId,
       },
     });
 

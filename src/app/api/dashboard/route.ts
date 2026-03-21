@@ -1,6 +1,7 @@
 // GET /api/dashboard — Returns computed profit metrics for the authenticated store.
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth-config";
+import { resolveStoreId } from "@/lib/resolve-store";
 import { computeDashboardMetrics } from "@/lib/profit-metrics";
 
 export async function GET(request: Request) {
@@ -8,7 +9,8 @@ export async function GET(request: Request) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!session.user.storeId) {
+  const storeId = await resolveStoreId(session);
+  if (!storeId) {
     return NextResponse.json({ noStore: true, error: "No store connected" }, { status: 200 });
   }
 
@@ -17,7 +19,7 @@ export async function GET(request: Request) {
   const periodDays = [7, 30, 90].includes(days) ? days : 30;
 
   try {
-    const metrics = await computeDashboardMetrics(session.user.storeId, periodDays);
+    const metrics = await computeDashboardMetrics(storeId, periodDays);
     return NextResponse.json(metrics);
   } catch (error) {
     console.error("Dashboard metrics error:", error);
