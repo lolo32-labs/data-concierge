@@ -1,5 +1,8 @@
 // GET /api/auth/shopify/callback?code=...&shop=...&state=...&hmac=...
 // Step 2 of OAuth: validates HMAC + state, exchanges code for token, stores encrypted.
+// Supports two flows:
+//   1. Authenticated user → connect store to existing account (original behavior)
+//   2. Unauthenticated user (new install) → auto-create account, set auto-signin cookie, redirect to onboarding
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { pool } from "@/lib/pool";
@@ -11,6 +14,8 @@ import {
   shopifyGraphQL,
 } from "@/lib/shopify";
 import { registerWebhooks } from "@/lib/shopify-webhooks";
+import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -28,13 +33,13 @@ export async function GET(request: Request) {
 
   if (!code || !shop || !state) {
     return NextResponse.redirect(
-      `${baseUrl}/auth/login?error=missing_params`
+      `${baseUrl}/connect?error=missing_params`
     );
   }
 
   if (!isValidShopDomain(shop)) {
     return NextResponse.redirect(
-      `${baseUrl}/auth/login?error=invalid_shop`
+      `${baseUrl}/connect?error=invalid_shop`
     );
   }
 
@@ -44,14 +49,14 @@ export async function GET(request: Request) {
   if (!apiSecret) {
     console.error("SHOPIFY_API_SECRET not configured");
     return NextResponse.redirect(
-      `${baseUrl}/auth/login?error=config_error`
+      `${baseUrl}/connect?error=config_error`
     );
   }
 
   if (!validateHmac(query, apiSecret)) {
     console.error("Shopify OAuth HMAC validation failed");
     return NextResponse.redirect(
-      `${baseUrl}/auth/login?error=invalid_hmac`
+      `${baseUrl}/connect?error=invalid_hmac`
     );
   }
 
@@ -61,29 +66,29 @@ export async function GET(request: Request) {
   const oauthStateCookie = cookieStore.get("shopify_oauth_state");
   if (!oauthStateCookie) {
     return NextResponse.redirect(
-      `${baseUrl}/auth/login?error=expired_state`
+      `${baseUrl}/connect?error=expired_state`
     );
   }
 
-  let savedState: { state: string; shop: string; userId: string };
+  let savedState: { state: string; shop: string; userId: string | null; isNewInstall?: boolean };
   try {
     savedState = JSON.parse(oauthStateCookie.value);
   } catch {
     return NextResponse.redirect(
-      `${baseUrl}/auth/login?error=invalid_state`
+      `${baseUrl}/connect?error=invalid_state`
     );
   }
 
   if (savedState.state !== state || savedState.shop !== shop) {
     return NextResponse.redirect(
-      `${baseUrl}/auth/login?error=state_mismatch`
+      `${baseUrl}/connect?error=state_mismatch`
     );
   }
 
   // Clear the OAuth state cookie
   cookieStore.delete("shopify_oauth_state");
 
-  const userId = savedState.userId;
+  const isNewInstall = savedState.isNewInstall ?? !savedState.userId;
 
   // ── Exchange code for access token ────────────────────────────────
 
@@ -96,13 +101,14 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Token exchange failed:", error);
     return NextResponse.redirect(
-      `${baseUrl}/auth/login?error=token_exchange_failed`
+      `${baseUrl}/connect?error=token_exchange_failed`
     );
   }
 
   // ── Fetch shop info from Shopify ──────────────────────────────────
 
   let shopName = shop.replace(".myshopify.com", "");
+  let shopEmail = "";
   let currency = "USD";
   let timezone = "UTC";
   let shopifyPlan = "unknown";
@@ -111,13 +117,15 @@ export async function GET(request: Request) {
     const data = await shopifyGraphQL(shop, accessToken, `{
       shop {
         name
+        email
         currencyCode
         timezoneAbbreviation
         plan { displayName }
       }
-    }`) as { shop: { name: string; currencyCode: string; timezoneAbbreviation: string; plan: { displayName: string } } };
+    }`) as { shop: { name: string; email: string; currencyCode: string; timezoneAbbreviation: string; plan: { displayName: string } } };
 
     shopName = data.shop.name;
+    shopEmail = data.shop.email;
     currency = data.shop.currencyCode;
     timezone = data.shop.timezoneAbbreviation;
     shopifyPlan = data.shop.plan.displayName;
@@ -125,11 +133,49 @@ export async function GET(request: Request) {
     console.warn("Failed to fetch shop info, using defaults:", error);
   }
 
-  // ── Create or update store + token in DB ──────────────────────────
+  // ── Resolve userId: use existing or auto-create ───────────────────
+
+  let userId = savedState.userId;
+  let tempPassword: string | null = null;
 
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+
+    if (isNewInstall || !userId) {
+      // Auto-create (or find) a user account using the Shopify store email
+      if (!shopEmail) {
+        // Fallback: use shop domain as email
+        shopEmail = `${shop.replace(".myshopify.com", "")}@shopify-user.profitsight.app`;
+      }
+
+      const existingUser = await client.query(
+        "SELECT id FROM users WHERE email = $1",
+        [shopEmail]
+      );
+
+      tempPassword = randomBytes(16).toString("hex");
+      const passwordHash = await bcrypt.hash(tempPassword, 12);
+
+      if (existingUser.rows.length > 0) {
+        userId = existingUser.rows[0].id;
+        // Update password so auto-sign-in works
+        await client.query(
+          "UPDATE users SET password_hash = $2, updated_at = now() WHERE id = $1",
+          [userId, passwordHash]
+        );
+      } else {
+        // Create new user from Shopify store info
+        const newUser = await client.query(
+          `INSERT INTO users (email, name, password_hash)
+           VALUES ($1, $2, $3) RETURNING id`,
+          [shopEmail, shopName, passwordHash]
+        );
+        userId = newUser.rows[0].id;
+      }
+    }
+
+    // ── Create or update store + token in DB ──────────────────────────
 
     // Upsert the store record
     const storeResult = await client.query(
@@ -167,7 +213,27 @@ export async function GET(request: Request) {
       console.error("Webhook registration failed:", err)
     );
 
-    // Redirect to onboarding (which triggers the data sync)
+    // ── Redirect ────────────────────────────────────────────────────
+
+    if (isNewInstall && tempPassword && shopEmail) {
+      // Set auto-signin cookie so the redirect page can sign in the new user
+      const response = NextResponse.redirect(
+        `${baseUrl}/onboarding?store=${storeId}&newInstall=1`
+      );
+      response.cookies.set("ps_auto_signin", JSON.stringify({
+        email: shopEmail,
+        tempPassword,
+      }), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 120, // 2 minutes — just enough for the redirect + sign-in
+        path: "/",
+      });
+      return response;
+    }
+
+    // Existing user — redirect straight to onboarding
     return NextResponse.redirect(
       `${baseUrl}/onboarding?store=${storeId}`
     );
@@ -175,7 +241,7 @@ export async function GET(request: Request) {
     await client.query("ROLLBACK");
     console.error("Failed to store Shopify credentials:", error);
     return NextResponse.redirect(
-      `${baseUrl}/auth/login?error=db_error`
+      `${baseUrl}/connect?error=db_error`
     );
   } finally {
     client.release();

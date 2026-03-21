@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -25,7 +26,30 @@ type Step = 1 | 2 | 3;
 // ── Main Component ──────────────────────────────────────────────────
 
 export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{
+            minHeight: "100vh",
+            background: "var(--bg-primary)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <p style={{ color: "var(--text-secondary)" }}>Loading...</p>
+        </div>
+      }
+    >
+      <OnboardingPageInner />
+    </Suspense>
+  );
+}
+
+function OnboardingPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<Step>(1);
   const [hasStore, setHasStore] = useState(false);
   const [shopDomain, setShopDomain] = useState("");
@@ -35,16 +59,44 @@ export default function OnboardingPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [costs, setCosts] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [autoSigningIn, setAutoSigningIn] = useState(false);
   const [profitData, setProfitData] = useState<{
     revenue: number;
     costs: number;
     profit: number;
   } | null>(null);
 
+  // ── Auto sign-in for new OAuth installs ───────────────────────────
+  // When the OAuth callback creates a new account, it sets a ps_auto_signin
+  // cookie with temp credentials. We consume it here to establish the session.
+
+  useEffect(() => {
+    const isNewInstall = searchParams.get("newInstall") === "1";
+    if (!isNewInstall) return;
+
+    setAutoSigningIn(true);
+
+    fetch("/api/auth/auto-signin", { method: "POST" })
+      .then((res) => res.json())
+      .then(async (data) => {
+        if (data.email && data.tempPassword) {
+          await signIn("credentials", {
+            email: data.email,
+            password: data.tempPassword,
+            redirect: false,
+          });
+        }
+        setAutoSigningIn(false);
+      })
+      .catch(() => {
+        setAutoSigningIn(false);
+      });
+  }, [searchParams]);
+
   // ── Step 1: Check store status, then sync if connected ──────────
 
   useEffect(() => {
-    if (step !== 1) return;
+    if (step !== 1 || autoSigningIn) return;
 
     // First check if user has a store connected
     fetch("/api/shopify/store-status")
@@ -65,7 +117,7 @@ export default function OnboardingPage() {
         setHasStore(false);
         setSyncStatus("pending");
       });
-  }, [step]);
+  }, [step, autoSigningIn]);
 
   // Poll for sync status only when syncing
   useEffect(() => {

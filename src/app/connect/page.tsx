@@ -32,7 +32,7 @@ export default function ConnectPage() {
         window.location.href = "/onboarding";
         return;
       } else if (data.useOAuth) {
-        // Redirect to OAuth flow for production
+        // Redirect to OAuth flow for production (no auth required)
         window.location.href = `/api/auth/shopify/authorize?shop=${encodeURIComponent(shopDomain)}`;
       } else {
         setError(data.error || "Failed to connect. Please try again.");
@@ -146,6 +146,36 @@ export default function ConnectPage() {
           <p style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 12 }}>
             We only need read access to your orders and products. No credit card required.
           </p>
+
+          {/* Secondary path: OAuth install */}
+          <div
+            style={{
+              marginTop: 20,
+              paddingTop: 20,
+              borderTop: "1px solid var(--border, #e5e5e5)",
+            }}
+          >
+            <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 10 }}>
+              Or install directly from Shopify
+            </p>
+            <a
+              href="/install"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "10px 20px",
+                borderRadius: 8,
+                border: "1px solid var(--border, #e5e5e5)",
+                background: "transparent",
+                color: "var(--text-primary)",
+                fontWeight: 500,
+                fontSize: 14,
+                textDecoration: "none",
+              }}
+            >
+              Install via Shopify
+            </a>
+          </div>
         </div>
 
         <div style={{ marginTop: 24, fontSize: 14, color: "var(--text-secondary)" }}>

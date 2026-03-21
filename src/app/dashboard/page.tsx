@@ -152,7 +152,7 @@ export default function DashboardPage() {
             </p>
             <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
               <a
-                href="/onboarding"
+                href="/connect"
                 style={{
                   padding: "12px 24px", borderRadius: 6, background: "var(--accent-primary)",
                   color: "var(--accent-primary-text)", textDecoration: "none", fontWeight: 600, fontSize: 15,
