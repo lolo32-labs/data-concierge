@@ -93,7 +93,7 @@ function NavBar() {
             Try Demo
           </Link>
           <Link
-            href="/auth/register"
+            href="/connect"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -180,7 +180,7 @@ function Hero() {
           }}
         >
           <Link
-            href="/auth/register"
+            href="/connect"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -548,7 +548,7 @@ function Pricing() {
           </ul>
 
           <Link
-            href="/auth/register"
+            href="/connect"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
