@@ -9,6 +9,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showForgotHelp, setShowForgotHelp] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,6 +79,26 @@ export default function LoginPage() {
               style={styles.input}
             />
           </div>
+
+          <div style={styles.forgotRow}>
+            <button
+              type="button"
+              onClick={() => setShowForgotHelp((v) => !v)}
+              style={styles.forgotLink}
+            >
+              Forgot password?
+            </button>
+          </div>
+
+          {showForgotHelp && (
+            <p style={styles.forgotHelp}>
+              Password reset is coming soon. For now, contact{" "}
+              <a href="mailto:support@profitsight.com" style={styles.link}>
+                support@profitsight.com
+              </a>{" "}
+              to reset your password.
+            </p>
+          )}
 
           <button type="submit" disabled={loading} style={styles.button}>
             {loading ? "Signing in..." : "Sign In"}
@@ -176,6 +197,31 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "0.625rem 0.75rem",
     borderRadius: "var(--radius-sm)",
     textAlign: "center" as const,
+  },
+  forgotRow: {
+    textAlign: "right" as const,
+    marginTop: "-0.25rem",
+  },
+  forgotLink: {
+    fontFamily: "var(--font-body)",
+    fontSize: "0.8rem",
+    color: "var(--brand-primary)",
+    background: "none",
+    border: "none",
+    padding: 0,
+    cursor: "pointer",
+    textDecoration: "none",
+    fontWeight: 500,
+  },
+  forgotHelp: {
+    fontFamily: "var(--font-body)",
+    fontSize: "0.8rem",
+    color: "var(--text-secondary)",
+    background: "var(--bg-subtle, #f5f5f5)",
+    padding: "0.625rem 0.75rem",
+    borderRadius: "var(--radius-sm)",
+    lineHeight: 1.5,
+    margin: 0,
   },
   footer: {
     fontFamily: "var(--font-body)",

@@ -41,13 +41,6 @@ interface SnapshotData {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function formatDate(iso: string | null): string {
-  if (!iso) return '';
-  const [year, month, day] = iso.split('-');
-  const d = new Date(Number(year), Number(month) - 1, Number(day));
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
 function healthTitle(score: number): string {
   if (score >= 71) return 'Profit Health: Good';
   if (score >= 41) return 'Profit Health: Needs Attention';
@@ -141,10 +134,7 @@ export default function DemoSnapshotPage() {
 
   const profitInsight = `Your margin is ${data.margin.toFixed(1)}% — ${marginVsIndustry} the apparel industry average of 45%.`;
 
-  const dateLabel =
-    data.dateRange.start && data.dateRange.end
-      ? `${formatDate(data.dateRange.start)} — ${formatDate(data.dateRange.end)}`
-      : 'Last 30 days';
+  const dateLabel = 'Last 30 days';
 
   // ── InsightCard descriptions ────────────────────────────────────────────────
 

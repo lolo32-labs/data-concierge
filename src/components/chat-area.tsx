@@ -24,7 +24,16 @@ const ChatArea = forwardRef<ChatAreaHandle, ChatAreaProps>(function ChatArea(
   { clientId, suggestedQuestions, initialQuestion, onMessageCountChange },
   ref
 ) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const storageKey = `chat-messages-${clientId}`;
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = sessionStorage.getItem(storageKey);
+      return stored ? (JSON.parse(stored) as Message[]) : [];
+    } catch {
+      return [];
+    }
+  });
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -35,6 +44,15 @@ const ChatArea = forwardRef<ChatAreaHandle, ChatAreaProps>(function ChatArea(
   useEffect(() => {
     loadingRef.current = loading;
   }, [loading]);
+
+  // Persist messages to sessionStorage
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(storageKey, JSON.stringify(messages));
+    } catch {
+      // storage full or unavailable — ignore
+    }
+  }, [messages, storageKey]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -105,14 +123,16 @@ const ChatArea = forwardRef<ChatAreaHandle, ChatAreaProps>(function ChatArea(
   useImperativeHandle(ref, () => ({ sendMessage }), [sendMessage]);
 
   // Auto-submit initial question (from ?q= param) after brief delay
+  // Skip if messages were restored from sessionStorage
   useEffect(() => {
-    if (initialQuestion && !initialQuestionSent.current) {
+    if (initialQuestion && !initialQuestionSent.current && messages.length === 0) {
       initialQuestionSent.current = true;
       const timer = setTimeout(() => {
         sendMessage(initialQuestion);
       }, 500);
       return () => clearTimeout(timer);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestion, sendMessage]);
 
   function handleSubmit(e: React.FormEvent) {

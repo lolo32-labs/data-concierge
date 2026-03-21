@@ -11,7 +11,7 @@ export function DemoBanner({
 }: DemoBannerProps) {
   return (
     <div
-      className="flex items-center justify-between py-2 px-4 text-sm"
+      className="flex flex-wrap items-center justify-center sm:justify-between py-2 px-4 text-sm text-center sm:text-left gap-1"
       style={{
         backgroundColor: 'var(--color-warning-subtle)',
         borderBottom: '1px solid var(--color-warning)',
@@ -22,7 +22,7 @@ export function DemoBanner({
       </span>
       <Link
         href={connectHref}
-        className="ml-4 whitespace-nowrap font-medium transition-opacity duration-100 hover:opacity-80"
+        className="whitespace-nowrap font-medium transition-opacity duration-100 hover:opacity-80"
         style={{ color: 'var(--brand-primary)' }}
       >
         Connect Your Real Store →
