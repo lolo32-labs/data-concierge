@@ -239,9 +239,10 @@ export async function GET(request: Request) {
     );
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error("Failed to store Shopify credentials:", error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error("Failed to store Shopify credentials:", errMsg, error);
     return NextResponse.redirect(
-      `${baseUrl}/connect?error=db_error`
+      `${baseUrl}/connect?error=db_error&detail=${encodeURIComponent(errMsg.slice(0, 100))}`
     );
   } finally {
     client.release();
