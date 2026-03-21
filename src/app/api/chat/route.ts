@@ -9,8 +9,11 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session?.user?.storeId) {
-    return NextResponse.json({ error: "No store connected" }, { status: 401 });
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!session.user.storeId) {
+    return NextResponse.json({ noStore: true, error: "No store connected" }, { status: 200 });
   }
 
   const { message } = (await request.json()) as { message: string };

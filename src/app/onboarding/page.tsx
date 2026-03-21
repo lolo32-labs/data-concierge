@@ -27,7 +27,9 @@ type Step = 1 | 2 | 3;
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
-  const [syncStatus, setSyncStatus] = useState("syncing");
+  const [hasStore, setHasStore] = useState(false);
+  const [shopDomain, setShopDomain] = useState("");
+  const [syncStatus, setSyncStatus] = useState("pending");
   const [orderCount, setOrderCount] = useState(0);
   const [productCount, setProductCount] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
@@ -39,15 +41,36 @@ export default function OnboardingPage() {
     profit: number;
   } | null>(null);
 
-  // ── Step 1: Trigger sync + poll ─────────────────────────────────
+  // ── Step 1: Check store status, then sync if connected ──────────
 
   useEffect(() => {
     if (step !== 1) return;
 
-    // Trigger sync
-    fetch("/api/shopify/sync", { method: "POST" }).catch(console.error);
+    // First check if user has a store connected
+    fetch("/api/shopify/store-status")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.connected || (data.store && !data.needsReconnect)) {
+          // Store exists — start syncing
+          setHasStore(true);
+          setSyncStatus("syncing");
+          fetch("/api/shopify/sync", { method: "POST" }).catch(console.error);
+        } else {
+          // No store — show connect prompt
+          setHasStore(false);
+          setSyncStatus("pending");
+        }
+      })
+      .catch(() => {
+        setHasStore(false);
+        setSyncStatus("pending");
+      });
+  }, [step]);
 
-    // Poll for status
+  // Poll for sync status only when syncing
+  useEffect(() => {
+    if (step !== 1 || syncStatus !== "syncing") return;
+
     const interval = setInterval(async () => {
       try {
         const res = await fetch("/api/shopify/sync-status");
@@ -58,7 +81,6 @@ export default function OnboardingPage() {
 
         if (data.syncStatus === "synced") {
           clearInterval(interval);
-          // Move to step 2 after a brief pause
           setTimeout(() => setStep(2), 1000);
         } else if (data.syncStatus === "error") {
           clearInterval(interval);
@@ -69,7 +91,7 @@ export default function OnboardingPage() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [step]);
+  }, [step, syncStatus]);
 
   // ── Step 2: Load products for COGS entry ────────────────────────
 
@@ -184,24 +206,66 @@ export default function OnboardingPage() {
       </div>
 
       <div style={{ maxWidth: 640, width: "100%" }}>
-        {/* ── Step 1: Sync Progress ────────────────────────────── */}
-        {step === 1 && (
+        {/* ── Step 1: Connect Store or Sync Progress ─────────── */}
+        {step === 1 && !hasStore && (
           <div style={{ textAlign: "center" }}>
-            <h1
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                marginBottom: 8,
-              }}
-            >
+            <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
+              Connect your Shopify store
+            </h1>
+            <p style={{ color: "var(--text-secondary)", marginBottom: 32 }}>
+              Enter your Shopify store URL to get started. We will pull your
+              orders and products to calculate your real profit.
+            </p>
+            <div style={{ background: "var(--bg-secondary)", borderRadius: 8, padding: 32, marginBottom: 24 }}>
+              <div style={{ display: "flex", gap: 8, maxWidth: 400, margin: "0 auto" }}>
+                <input
+                  type="text"
+                  placeholder="yourstore.myshopify.com"
+                  value={shopDomain}
+                  onChange={(e) => setShopDomain(e.target.value)}
+                  style={{
+                    flex: 1, padding: "12px 16px", borderRadius: 6,
+                    border: "1px solid var(--border-primary)",
+                    background: "var(--bg-primary)", color: "var(--text-primary)",
+                    fontSize: 14,
+                  }}
+                />
+                <a
+                  href={shopDomain.includes(".myshopify.com")
+                    ? `/api/auth/shopify/authorize?shop=${encodeURIComponent(shopDomain)}`
+                    : "#"}
+                  onClick={(e) => {
+                    if (!shopDomain.includes(".myshopify.com")) {
+                      e.preventDefault();
+                    }
+                  }}
+                  style={{
+                    padding: "12px 20px", borderRadius: 6, border: "none",
+                    background: "var(--accent-primary)", color: "var(--accent-primary-text)",
+                    fontWeight: 600, fontSize: 14, textDecoration: "none",
+                    opacity: shopDomain.includes(".myshopify.com") ? 1 : 0.5,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Connect
+                </a>
+              </div>
+              <p style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 12 }}>
+                We only need read access to your orders and products.
+              </p>
+            </div>
+            <a href="/demo/snapshot" style={{ color: "var(--text-secondary)", fontSize: 14, textDecoration: "none" }}>
+              or try the demo first
+            </a>
+          </div>
+        )}
+
+        {step === 1 && hasStore && (
+          <div style={{ textAlign: "center" }}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
               Syncing your Shopify data
             </h1>
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                marginBottom: 32,
-              }}
-            >
+            <p style={{ color: "var(--text-secondary)", marginBottom: 32 }}>
               Pulling your orders and products from Shopify. This usually
               takes 1-3 minutes.
             </p>

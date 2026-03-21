@@ -6,8 +6,11 @@ import { runFullSync } from "@/lib/shopify-sync";
 
 export async function POST() {
   const session = await auth();
-  if (!session?.user?.storeId) {
-    return NextResponse.json({ error: "No store connected" }, { status: 401 });
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!session.user.storeId) {
+    return NextResponse.json({ noStore: true, error: "No store connected" }, { status: 200 });
   }
 
   try {
