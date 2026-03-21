@@ -1,9 +1,10 @@
-// POST /api/shopify/sync — Trigger a full sync for the authenticated user's store.
+// POST /api/shopify/sync — Trigger an incremental sync for the authenticated user's store.
 // Called from onboarding flow and "Refresh Now" button.
+// Uses paginated GraphQL queries (50 items/page) instead of bulk operations.
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth-config";
 import { resolveStoreId } from "@/lib/resolve-store";
-import { runFullSync } from "@/lib/shopify-sync";
+import { runIncrementalSync } from "@/lib/shopify-incremental-sync";
 
 export async function POST() {
   const session = await auth();
@@ -16,7 +17,7 @@ export async function POST() {
   }
 
   try {
-    const result = await runFullSync(storeId);
+    const result = await runIncrementalSync(storeId);
     return NextResponse.json({
       success: true,
       synced: result,

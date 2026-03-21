@@ -1,5 +1,6 @@
 // GET /api/shopify/sync-status — Check sync status for the authenticated user's store.
-// Used by onboarding UI to poll for sync completion.
+// Used by onboarding UI to poll for sync completion and show live progress.
+// Returns current counts so the UI can display "17 products synced, 5 orders synced..."
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth-config";
 import { resolveStoreId } from "@/lib/resolve-store";
@@ -16,10 +17,12 @@ export async function GET() {
   }
 
   const result = await pool.query(
-    `SELECT sync_status, last_sync_at,
+    `SELECT s.sync_status, s.last_sync_at, s.shop_name,
        (SELECT COUNT(*) FROM shopify_orders WHERE store_id = $1)::int AS order_count,
-       (SELECT COUNT(*) FROM shopify_products WHERE store_id = $1)::int AS product_count
-     FROM stores WHERE id = $1`,
+       (SELECT COUNT(*) FROM shopify_products WHERE store_id = $1)::int AS product_count,
+       (SELECT COUNT(*) FROM shopify_product_variants WHERE store_id = $1)::int AS variant_count,
+       (SELECT COUNT(*) FROM shopify_order_line_items WHERE store_id = $1)::int AS line_item_count
+     FROM stores s WHERE s.id = $1`,
     [storeId]
   );
 
@@ -31,7 +34,10 @@ export async function GET() {
   return NextResponse.json({
     syncStatus: store.sync_status,
     lastSyncAt: store.last_sync_at,
-    orderCount: store.order_count,
+    shopName: store.shop_name,
     productCount: store.product_count,
+    variantCount: store.variant_count,
+    orderCount: store.order_count,
+    lineItemCount: store.line_item_count,
   });
 }

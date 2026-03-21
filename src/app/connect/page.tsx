@@ -1,46 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 
 export default function ConnectPage() {
   const [shopDomain, setShopDomain] = useState("");
-  const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleConnect() {
-    if (!shopDomain.includes(".myshopify.com")) return;
-    setConnecting(true);
-    setError("");
-
-    try {
-      // Try dev connect (auto-creates account + connects store)
-      const res = await fetch("/api/shopify/connect-quick", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ shopDomain }),
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        // Sign in with the temp password the API created
-        await signIn("credentials", {
-          email: data.email,
-          password: data.tempPassword,
-          redirect: false,
-        });
-        window.location.href = "/onboarding";
-        return;
-      } else if (data.useOAuth) {
-        // Redirect to OAuth flow for production (no auth required)
-        window.location.href = `/api/auth/shopify/authorize?shop=${encodeURIComponent(shopDomain)}`;
-      } else {
-        setError(data.error || "Failed to connect. Please try again.");
-      }
-    } catch {
-      setError("Something went wrong. Please try again.");
+  function handleConnect() {
+    const domain = shopDomain.trim();
+    if (!domain.includes(".myshopify.com")) {
+      setError("Please enter a valid .myshopify.com URL.");
+      return;
     }
-    setConnecting(false);
+    // Always go through Shopify OAuth — no API calls, just a redirect
+    window.location.href = `/api/auth/shopify/authorize?shop=${encodeURIComponent(domain)}`;
   }
 
   return (
@@ -126,7 +99,7 @@ export default function ConnectPage() {
 
           <button
             onClick={handleConnect}
-            disabled={connecting || !shopDomain.includes(".myshopify.com")}
+            disabled={!shopDomain.includes(".myshopify.com")}
             style={{
               width: "100%",
               padding: "14px 24px",
@@ -136,11 +109,11 @@ export default function ConnectPage() {
               color: "#fff",
               fontWeight: 600,
               fontSize: 16,
-              cursor: connecting ? "wait" : "pointer",
-              opacity: connecting || !shopDomain.includes(".myshopify.com") ? 0.6 : 1,
+              cursor: "pointer",
+              opacity: !shopDomain.includes(".myshopify.com") ? 0.6 : 1,
             }}
           >
-            {connecting ? "Connecting..." : "Connect & Get Started"}
+            Connect & Get Started
           </button>
 
           <p style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 12 }}>
