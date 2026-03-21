@@ -136,7 +136,7 @@ export default function DashboardPage() {
             <a href="/chat" style={{ padding: "6px 12px", borderRadius: 4, background: "var(--bg-secondary)", color: "var(--text-primary)", textDecoration: "none", fontSize: 13 }}>
               Ask a question
             </a>
-            <a href="/api/auth/signout" style={{ padding: "6px 12px", borderRadius: 4, color: "var(--text-secondary)", textDecoration: "none", fontSize: 13 }}>
+            <a href="/auth/signout" style={{ padding: "6px 12px", borderRadius: 4, color: "var(--text-secondary)", textDecoration: "none", fontSize: 13 }}>
               Sign out
             </a>
           </div>

@@ -164,8 +164,21 @@ const ChatArea = forwardRef<ChatAreaHandle, ChatAreaProps>(function ChatArea(
                     border: "1px solid var(--border)",
                   }}
                 >
-                  Thinking...
+                  Analyzing your data<span className="loading-dots" />
                 </div>
+                <style>{`
+                  .loading-dots::after {
+                    content: '';
+                    animation: dots 1.5s steps(4, end) infinite;
+                  }
+                  @keyframes dots {
+                    0% { content: ''; }
+                    25% { content: '.'; }
+                    50% { content: '..'; }
+                    75% { content: '...'; }
+                    100% { content: ''; }
+                  }
+                `}</style>
               </div>
             )}
             <div ref={messagesEndRef} />

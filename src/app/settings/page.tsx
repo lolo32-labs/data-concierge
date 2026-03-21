@@ -160,7 +160,7 @@ export default function SettingsPage() {
           >
             <p style={{ fontSize: 16, marginBottom: 8 }}>No products synced yet</p>
             <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
-              Connect your Shopify store to see products here.
+              <a href="/onboarding" style={{ color: "var(--accent-primary)", textDecoration: "none", fontWeight: 500 }}>Connect your Shopify store</a> to see products here.
             </p>
           </div>
         ) : (

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, notFound } from 'next/navigation';
 import Link from 'next/link';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -643,11 +643,22 @@ function AdSpendSection({ onSave }: { onSave: () => void }) {
   );
 }
 
+// ── Client ID Validation ─────────────────────────────────────────────────────
+
+const VALID_CLIENT_IDS = ["demo"];
+function isValidClientId(id: string): boolean {
+  return VALID_CLIENT_IDS.includes(id) || /^[0-9a-f-]{36}$/.test(id);
+}
+
 // ── Settings Page ─────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const router = useRouter();
+
+  if (!isValidClientId(clientId)) {
+    notFound();
+  }
 
   const [storeName, setStoreName] = useState('');
   const [toastVisible, setToastVisible] = useState(false);

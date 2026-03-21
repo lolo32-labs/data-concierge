@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback, Suspense } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams, notFound } from 'next/navigation';
 import Link from 'next/link';
 import ChatArea from '@/components/chat-area';
 import type { ChatAreaHandle } from '@/components/chat-area';
@@ -188,6 +188,13 @@ function NavHeader({
   );
 }
 
+// ── Client ID Validation ────────────────────────────────────────────────────
+
+const VALID_CLIENT_IDS = ["demo"];
+function isValidClientId(id: string): boolean {
+  return VALID_CLIENT_IDS.includes(id) || /^[0-9a-f-]{36}$/.test(id);
+}
+
 // ── Chat Inner (uses useSearchParams) ────────────────────────────────────────
 
 function ChatInner() {
@@ -195,6 +202,10 @@ function ChatInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialQuestion = searchParams.get('q') || undefined;
+
+  if (!isValidClientId(clientId)) {
+    notFound();
+  }
 
   const [storeName, setStoreName] = useState('');
   const [snapshot, setSnapshot] = useState<SnapshotData | null>(null);

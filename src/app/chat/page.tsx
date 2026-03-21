@@ -190,8 +190,21 @@ function ChatContent() {
           {loading && (
             <div style={{ display: "flex", marginBottom: 16 }}>
               <div style={{ padding: "12px 16px", borderRadius: "16px 16px 16px 4px", background: "var(--bg-secondary)", color: "var(--text-secondary)", fontSize: 14 }}>
-                Analyzing your data...
+                Analyzing your data<span className="loading-dots" />
               </div>
+              <style>{`
+                .loading-dots::after {
+                  content: '';
+                  animation: dots 1.5s steps(4, end) infinite;
+                }
+                @keyframes dots {
+                  0% { content: ''; }
+                  25% { content: '.'; }
+                  50% { content: '..'; }
+                  75% { content: '...'; }
+                  100% { content: ''; }
+                }
+              `}</style>
             </div>
           )}
 

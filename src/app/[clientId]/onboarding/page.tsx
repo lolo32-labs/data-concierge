@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, notFound } from 'next/navigation';
 import Link from 'next/link';
 import {
   HealthScore,
@@ -552,9 +552,18 @@ function StepSnapshot({ clientId, data }: StepSnapshotProps) {
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
+const VALID_CLIENT_IDS = ["demo"];
+function isValidClientId(id: string): boolean {
+  return VALID_CLIENT_IDS.includes(id) || /^[0-9a-f-]{36}$/.test(id);
+}
+
 export default function OnboardingPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const router = useRouter();
+
+  if (!isValidClientId(clientId)) {
+    notFound();
+  }
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);

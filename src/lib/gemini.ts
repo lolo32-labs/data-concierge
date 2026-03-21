@@ -2,7 +2,10 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.5-flash",
+  generationConfig: { temperature: 0 },
+});
 
 /**
  * Step 1: Generate a SQL query from a natural language question.
@@ -83,7 +86,8 @@ RESPONSE FORMAT RULES:
 6. **If numbers look concerning** (negative margins, rising costs, declining trends), flag it directly. Do not call bad results "solid" or "healthy."
 7. Keep responses under 200 words. Be concise.
 8. Do NOT say "based on the data" or "according to the query" — speak naturally.
-9. Use bold for key numbers and percentages throughout.`;
+9. Use bold for key numbers and percentages throughout.
+10. NEVER write "Data not available", "N/A", or any placeholder text. If a value is 0 or null, write $0.00. Always use the actual numbers from the data provided.`;
 
   const result = await model.generateContent(prompt);
   return result.response.text().trim();

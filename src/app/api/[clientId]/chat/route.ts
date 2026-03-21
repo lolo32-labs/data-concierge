@@ -41,6 +41,46 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   }
 
   try {
+    // Special case: "what if" / "raise prices" simulations — these aren't SQL queries
+    const lowerQ = question.toLowerCase();
+    if (lowerQ.includes("raise price") || lowerQ.includes("raise all price") || (lowerQ.includes("what if") && lowerQ.includes("price"))) {
+      // Get current revenue and profit from a simple query
+      let rows;
+      try {
+        rows = await executeClientQuery(
+          config.database_schema,
+          `SELECT COALESCE(SUM(subtotal), 0) AS revenue,
+                  COALESCE(SUM(subtotal), 0) - COALESCE((SELECT SUM(oi.unit_cost * oi.quantity) FROM order_items oi JOIN orders o2 ON oi.order_id = o2.id WHERE o2.status NOT IN ('refunded','cancelled')), 0) AS gross_profit
+           FROM orders WHERE status NOT IN ('refunded','cancelled')`
+        );
+      } catch {
+        rows = [{ revenue: 0, gross_profit: 0 }];
+      }
+
+      const revenue = Number(rows[0]?.revenue ?? 0);
+      const grossProfit = Number(rows[0]?.gross_profit ?? 0);
+
+      // Extract percentage from question (default to 10%)
+      const pctMatch = lowerQ.match(/(\d+)\s*%/);
+      const pct = pctMatch ? parseInt(pctMatch[1], 10) : 10;
+      const increase = pct / 100;
+
+      const newRevenue = revenue * (1 + increase);
+      const newProfit = grossProfit + (revenue * increase);
+      const fmt = (n: number) => "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const answer = `**If you raise all prices by ${pct}%:**\n\n` +
+        `- Current revenue: **${fmt(revenue)}**\n` +
+        `- New revenue: **${fmt(newRevenue)}** (+${fmt(revenue * increase)})\n` +
+        `- Current gross profit: **${fmt(grossProfit)}**\n` +
+        `- New gross profit: **${fmt(newProfit)}** (+${fmt(revenue * increase)})\n\n` +
+        `This assumes the same order volume — no demand drop from higher prices. ` +
+        `In practice, a ${pct}% price increase often reduces volume by 2-5%. ` +
+        `**Recommendation:** Test the increase on your top 3 products first and monitor conversion rates for 2 weeks before rolling out store-wide.`;
+
+      return NextResponse.json({ answer });
+    }
+
     // Step 1: Generate SQL
     const rawSQL = await generateSQL(question, config.schema_description, config.business_context);
 

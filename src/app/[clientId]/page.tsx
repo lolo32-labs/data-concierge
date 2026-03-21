@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { HealthScore, MetricCard, AlertBar } from '@/components/shared';
 
@@ -541,9 +541,18 @@ function QuickActions({ clientId }: { clientId: string }) {
 
 // ── Dashboard Inner (uses useSearchParams for potential future use) ──────────
 
+const VALID_CLIENT_IDS = ["demo"];
+function isValidClientId(id: string): boolean {
+  return VALID_CLIENT_IDS.includes(id) || /^[0-9a-f-]{36}$/.test(id);
+}
+
 function DashboardInner() {
   const { clientId } = useParams<{ clientId: string }>();
   const router = useRouter();
+
+  if (!isValidClientId(clientId)) {
+    notFound();
+  }
 
   const [data, setData] = useState<StoreMetrics | null>(null);
   const [storeName, setStoreName] = useState('');

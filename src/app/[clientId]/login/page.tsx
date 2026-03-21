@@ -1,11 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, notFound } from "next/navigation";
+
+const VALID_CLIENT_IDS = ["demo"];
+function isValidClientId(id: string): boolean {
+  return VALID_CLIENT_IDS.includes(id) || /^[0-9a-f-]{36}$/.test(id);
+}
 
 export default function LoginPage() {
   const { clientId } = useParams<{ clientId: string }>();
   const router = useRouter();
+
+  if (!isValidClientId(clientId)) {
+    notFound();
+  }
+
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
