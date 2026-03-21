@@ -25,7 +25,7 @@ CRITICAL CALCULATION RULES:
 - "Gross profit" = Revenue MINUS COGS only.
 - "Margin" = (unit_price - unit_cost) / unit_price * 100.
 - When calculating net profit that includes ad spend, use a subquery for ad_spend since it's a separate table.
-- Always filter by date >= date_trunc('month', CURRENT_DATE) for "this month" questions.
+- For "this month" or "recent" questions, filter by date >= (SELECT MAX(date) FROM orders) - INTERVAL '30 days'. This matches the dashboard's 30-day window.
 - Exclude orders with status = 'refunded' or 'cancelled' from profit calculations unless specifically asked.
 - When showing products, show the TOP 5 by default unless the user asks for more or fewer.
 

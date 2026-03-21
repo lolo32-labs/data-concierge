@@ -59,6 +59,22 @@ function NavBar() {
         {/* CTAs */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Link
+            href="/auth/login"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '8px 18px',
+              fontSize: 14,
+              fontWeight: 500,
+              color: 'var(--text-secondary)',
+              background: 'transparent',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Sign In
+          </Link>
+          <Link
             href="/demo/snapshot"
             style={{
               display: 'inline-flex',
@@ -77,7 +93,7 @@ function NavBar() {
             Try Demo
           </Link>
           <Link
-            href="#pricing"
+            href="/auth/register"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -164,7 +180,7 @@ function Hero() {
           }}
         >
           <Link
-            href="#pricing"
+            href="/auth/register"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -532,7 +548,7 @@ function Pricing() {
           </ul>
 
           <Link
-            href="#pricing"
+            href="/auth/register"
             style={{
               display: 'inline-flex',
               alignItems: 'center',

@@ -18,11 +18,11 @@ interface SnapshotData {
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const QUICK_QUESTIONS = [
-  "What's my real profit?",
-  'Which products make money?',
-  'Am I wasting ad spend?',
-  'Margins by channel?',
-  'What if I raise prices?',
+  "What's my real profit this month?",
+  'Which products are actually making me money?',
+  'How much did I spend on ads vs. what they brought in?',
+  'What are my margins by order channel?',
+  'What if I raise all prices by 10%?',
 ];
 
 const SUGGESTED_QUESTIONS = [
@@ -30,7 +30,7 @@ const SUGGESTED_QUESTIONS = [
   'Which products are actually making me money?',
   'How much did I spend on ads vs. what they brought in?',
   'What are my margins by order channel?',
-  'What happens to my profit if I raise prices by $5?',
+  'What is my average order value by channel?',
 ];
 
 // ── Mini Health Score Circle ──────────────────────────────────────────────────

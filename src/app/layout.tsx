@@ -3,8 +3,20 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  title: "ProfitSight",
-  description: "Your Shopify Profit Advisor",
+  title: "ProfitSight — Know Your Real Shopify Profit",
+  description: "ProfitSight connects to your Shopify store and answers your profit questions in plain English. See real profit after COGS, fees, ads, and refunds. $19/mo.",
+  openGraph: {
+    title: "ProfitSight — Know Your Real Shopify Profit",
+    description: "Stop guessing. Ask ProfitSight what your real profit is, which products make money, and where your ad spend goes. Connects to Shopify in 60 seconds.",
+    type: "website",
+    url: "https://data-concierge.vercel.app",
+    siteName: "ProfitSight",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ProfitSight — Know Your Real Shopify Profit",
+    description: "Your Shopify profit, answered in plain English. Not revenue. Profit.",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
