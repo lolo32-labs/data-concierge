@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
 
 /**
- * Check if the request is authenticated for a given client.
- * Returns true if the auth cookie is present and valid.
- * The "demo" client is always allowed (no auth required).
+ * LEGACY AUTH — cookie-based, used ONLY by /[clientId]/* demo routes.
+ * Do NOT use this for new merchant routes. Use Auth.js from auth-config.ts instead.
+ * This will be removed once demo mode migrates to the new multi-tenant schema.
  */
 export async function isAuthenticated(clientId: string): Promise<boolean> {
   if (clientId === "demo") return true;

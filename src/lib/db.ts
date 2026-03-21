@@ -1,17 +1,6 @@
 // src/lib/db.ts
-import { Pool, type QueryResultRow } from "pg";
-
-// Admin pool — used by config loader and metrics
-const adminPool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 5,
-});
-
-// Readonly pool — used for AI-generated queries only
-const readonlyPool = new Pool({
-  connectionString: process.env.DATABASE_READONLY_URL,
-  max: 5,
-});
+import { type QueryResultRow } from "pg";
+import { pool as adminPool, readonlyPool } from "./pool";
 
 /**
  * Execute a safe, read-only query scoped to a client's schema.

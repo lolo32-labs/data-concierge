@@ -1,11 +1,5 @@
 // src/lib/metrics.ts
-import { Pool } from "pg";
-
-// Use a dedicated pool for metrics queries
-const metricsPool = new Pool({
-  connectionString: process.env.DATABASE_READONLY_URL || process.env.DATABASE_URL,
-  max: 3,
-});
+import { readonlyPool as metricsPool } from "./pool";
 
 export interface StoreMetrics {
   healthScore: number;

@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
-import { Pool } from "pg";
 import bcrypt from "bcryptjs";
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 3,
-});
+import { pool } from "@/lib/pool";
 
 export async function POST(request: Request) {
   try {
@@ -49,7 +44,14 @@ export async function POST(request: Request) {
       { user: result.rows[0], message: "Account created successfully" },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
+    // Handle Postgres unique violation (race condition: concurrent signup with same email)
+    if (error && typeof error === "object" && "code" in error && error.code === "23505") {
+      return NextResponse.json(
+        { error: "An account with this email already exists" },
+        { status: 409 }
+      );
+    }
     console.error("Registration error:", error);
     return NextResponse.json(
       { error: "Something went wrong. Please try again." },

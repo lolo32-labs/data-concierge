@@ -134,17 +134,17 @@ CREATE TABLE IF NOT EXISTS public.shopify_orders (
   id                  UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id            UUID          NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
   shopify_gid         TEXT          NOT NULL,
-  order_number        TEXT,
-  created_at_shopify  TIMESTAMPTZ,
-  financial_status    TEXT,
+  order_number        TEXT          NOT NULL,
+  created_at_shopify  TIMESTAMPTZ   NOT NULL,
+  financial_status    TEXT          NOT NULL,
   fulfillment_status  TEXT,
-  currency            TEXT,
-  subtotal_price      NUMERIC(12,2),
-  total_shipping      NUMERIC(12,2),
-  total_tax           NUMERIC(12,2),
-  total_discounts     NUMERIC(12,2),
-  total_refunded      NUMERIC(12,2),
-  current_total_price NUMERIC(12,2),
+  currency            TEXT          NOT NULL DEFAULT 'USD',
+  subtotal_price      NUMERIC(12,2) NOT NULL,
+  total_shipping      NUMERIC(12,2) NOT NULL DEFAULT 0,
+  total_tax           NUMERIC(12,2) NOT NULL DEFAULT 0,
+  total_discounts     NUMERIC(12,2) NOT NULL DEFAULT 0,
+  total_refunded      NUMERIC(12,2) NOT NULL DEFAULT 0,
+  current_total_price NUMERIC(12,2) NOT NULL,
   channel_name        TEXT,
   source_name         TEXT,
   customer_email      TEXT,
@@ -166,9 +166,9 @@ CREATE TABLE IF NOT EXISTS public.shopify_order_line_items (
   product_title   TEXT,
   variant_title   TEXT,
   sku             TEXT,
-  quantity        INTEGER,
-  unit_price      NUMERIC(12,2),
-  total_discount  NUMERIC(12,2),
+  quantity        INTEGER       NOT NULL,
+  unit_price      NUMERIC(12,2) NOT NULL,
+  total_discount  NUMERIC(12,2) DEFAULT 0,
   created_at      TIMESTAMPTZ   NOT NULL DEFAULT now(),
   UNIQUE(store_id, shopify_gid)
 );
@@ -182,6 +182,29 @@ CREATE TABLE IF NOT EXISTS public.shopify_refunds (
   total_refunded      NUMERIC(12,2),
   note                TEXT,
   created_at          TIMESTAMPTZ   NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.shopify_refund_line_items (
+  id            UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+  refund_id     UUID          NOT NULL REFERENCES public.shopify_refunds(id) ON DELETE CASCADE,
+  line_item_id  UUID          REFERENCES public.shopify_order_line_items(id),
+  quantity      INTEGER       NOT NULL,
+  subtotal      NUMERIC(12,2) NOT NULL,
+  created_at    TIMESTAMPTZ   NOT NULL DEFAULT now()
+);
+
+-- ============================================================
+-- CHAT HISTORY
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.chat_messages (
+  id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id        UUID        NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
+  role            TEXT        NOT NULL,
+  content         TEXT        NOT NULL,
+  query_template  TEXT,
+  sql_executed    TEXT,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ============================================================
@@ -253,6 +276,15 @@ CREATE INDEX IF NOT EXISTS idx_shopify_order_line_items_shopify_gid ON public.sh
 -- shopify_refunds
 CREATE INDEX IF NOT EXISTS idx_shopify_refunds_store_id ON public.shopify_refunds(store_id);
 CREATE INDEX IF NOT EXISTS idx_shopify_refunds_order_id ON public.shopify_refunds(order_id);
+
+-- shopify_refund_line_items
+CREATE INDEX IF NOT EXISTS idx_refund_line_items_refund_id ON public.shopify_refund_line_items(refund_id);
+
+-- chat_messages
+CREATE INDEX IF NOT EXISTS idx_chat_messages_store_date ON public.chat_messages(store_id, created_at DESC);
+
+-- shopify_orders (financial_status for profit calculations)
+CREATE INDEX IF NOT EXISTS idx_shopify_orders_financial_status ON public.shopify_orders(store_id, financial_status);
 
 -- ad_spend_entries
 CREATE INDEX IF NOT EXISTS idx_ad_spend_entries_store_id ON public.ad_spend_entries(store_id);
