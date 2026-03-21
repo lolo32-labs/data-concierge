@@ -141,8 +141,30 @@ export default function DashboardPage() {
           <div style={{ textAlign: "center", padding: 80 }}>Loading metrics...</div>
         ) : !metrics ? (
           <div style={{ textAlign: "center", padding: 80, background: "var(--bg-secondary)", borderRadius: 8 }}>
-            <p style={{ fontSize: 18, marginBottom: 8 }}>No data yet</p>
-            <p style={{ color: "var(--text-secondary)" }}>Connect your Shopify store and sync your orders to see profit data.</p>
+            <p style={{ fontSize: 24, fontWeight: 600, marginBottom: 8 }}>Welcome to ProfitSight</p>
+            <p style={{ color: "var(--text-secondary)", marginBottom: 24, maxWidth: 400, margin: "0 auto 24px" }}>
+              Connect your Shopify store to see your real profit. It takes about 2 minutes.
+            </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+              <a
+                href="/onboarding"
+                style={{
+                  padding: "12px 24px", borderRadius: 6, background: "var(--accent-primary)",
+                  color: "var(--accent-primary-text)", textDecoration: "none", fontWeight: 600, fontSize: 15,
+                }}
+              >
+                Connect Shopify Store
+              </a>
+              <a
+                href="/demo/snapshot"
+                style={{
+                  padding: "12px 24px", borderRadius: 6, border: "1px solid var(--border-primary)",
+                  color: "var(--text-primary)", textDecoration: "none", fontSize: 15,
+                }}
+              >
+                Try Demo First
+              </a>
+            </div>
           </div>
         ) : (
           <>

@@ -43,7 +43,7 @@ export default function RegisterPage() {
         // Account created but auto-login failed — redirect to login
         window.location.href = "/auth/login";
       } else {
-        window.location.href = "/dashboard";
+        window.location.href = "/onboarding";
       }
     } catch {
       setError("Something went wrong. Please try again.");

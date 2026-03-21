@@ -26,7 +26,10 @@ export default function LoginPage() {
       if (result?.error) {
         setError("Invalid email or password");
       } else {
-        window.location.href = "/dashboard";
+        // Check for callbackUrl from middleware redirect
+        const params = new URLSearchParams(window.location.search);
+        const callbackUrl = params.get("callbackUrl") || "/dashboard";
+        window.location.href = callbackUrl;
       }
     } catch {
       setError("Something went wrong. Please try again.");
