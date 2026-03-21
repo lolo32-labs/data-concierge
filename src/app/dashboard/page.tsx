@@ -64,14 +64,16 @@ export default function DashboardPage() {
     try {
       const res = await fetch(`/api/dashboard?days=${days}`);
       if (res.status === 401) {
-        // Check if store needs reconnect
-        const statusRes = await fetch("/api/shopify/store-status");
-        const status = await statusRes.json();
-        setNeedsReconnect(status.needsReconnect);
-        setLoading(false);
+        window.location.href = "/auth/login";
         return;
       }
       const data = await res.json();
+      if (data.noStore) {
+        // User is authenticated but has no store — show empty state
+        setMetrics(null);
+        setLoading(false);
+        return;
+      }
       setMetrics(data);
     } catch (e) {
       console.error("Failed to load metrics:", e);

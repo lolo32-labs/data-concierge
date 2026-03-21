@@ -302,7 +302,7 @@ export default function DemoSnapshotPage() {
           >
             {/* Primary CTA */}
             <Link
-              href="/"
+              href="/auth/register"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',

@@ -77,10 +77,11 @@ function ChatContent() {
         body: JSON.stringify({ message: text }),
       });
       const data = await res.json();
-      const assistantMsg: Message = {
-        role: "assistant",
-        content: data.answer || data.error || "Sorry, I couldn't process that.",
-      };
+      let content = data.answer || data.error || "Sorry, I couldn't process that.";
+      if (data.noStore) {
+        content = "You haven't connected a Shopify store yet. Go to /onboarding to connect your store, or try the demo at /demo/chat to see ProfitSight in action!";
+      }
+      const assistantMsg: Message = { role: "assistant", content };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch {
       setMessages((prev) => [
