@@ -230,25 +230,37 @@ export default function OnboardingPage() {
                     fontSize: 14,
                   }}
                 />
-                <a
-                  href={shopDomain.includes(".myshopify.com")
-                    ? `/api/auth/shopify/authorize?shop=${encodeURIComponent(shopDomain)}`
-                    : "#"}
-                  onClick={(e) => {
-                    if (!shopDomain.includes(".myshopify.com")) {
-                      e.preventDefault();
-                    }
+                <button
+                  onClick={async () => {
+                    if (!shopDomain.includes(".myshopify.com")) return;
+                    // Try dev connect first (uses pre-configured token)
+                    try {
+                      const res = await fetch("/api/shopify/connect-dev", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ shopDomain }),
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        setHasStore(true);
+                        setSyncStatus("syncing");
+                        fetch("/api/shopify/sync", { method: "POST" }).catch(console.error);
+                        return;
+                      }
+                    } catch { /* fall through to OAuth */ }
+                    // Fallback to OAuth flow
+                    window.location.href = `/api/auth/shopify/authorize?shop=${encodeURIComponent(shopDomain)}`;
                   }}
                   style={{
                     padding: "12px 20px", borderRadius: 6, border: "none",
                     background: "var(--accent-primary)", color: "var(--accent-primary-text)",
-                    fontWeight: 600, fontSize: 14, textDecoration: "none",
+                    fontWeight: 600, fontSize: 14, cursor: "pointer",
                     opacity: shopDomain.includes(".myshopify.com") ? 1 : 0.5,
                     whiteSpace: "nowrap",
                   }}
                 >
                   Connect
-                </a>
+                </button>
               </div>
               <p style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 12 }}>
                 We only need read access to your orders and products.
