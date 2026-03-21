@@ -203,18 +203,29 @@ function ChatContent() {
             onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
             style={{ display: "flex", gap: 8 }}
           >
-            <input
-              type="text"
+            <textarea
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage(input);
+                }
+              }}
               placeholder="Ask about your profit, products, or ads..."
               disabled={loading}
+              rows={1}
               style={{
                 flex: 1, padding: "12px 16px", borderRadius: 8,
                 border: "1px solid var(--border-primary)",
                 background: "var(--bg-secondary)",
                 color: "var(--text-primary)", fontSize: 14,
-                outline: "none",
+                outline: "none", resize: "none", overflow: "hidden",
+                fontFamily: "inherit",
               }}
             />
             <button

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (!validation.valid) {
       console.error("SQL validation failed:", validation.error, "SQL:", rawSQL);
       return NextResponse.json({
-        answer: "I couldn't generate a query for that. Try rephrasing your question.",
+        answer: "I wasn't able to answer that specific question. Try asking about your profit, top products, ad spend, or channel margins — those are my specialties!",
       });
     }
 
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }
       console.error("DB query error:", message);
       return NextResponse.json({
-        answer: "I couldn't generate a query for that. Try rephrasing your question.",
+        answer: "I wasn't able to answer that specific question. Try asking about your profit, top products, ad spend, or channel margins — those are my specialties!",
       });
     }
 

@@ -270,7 +270,7 @@ function ValueProps() {
             }}
           >
             <div style={{ fontSize: 32, marginBottom: 16 }}>{prop.icon}</div>
-            <h3
+            <h2
               style={{
                 fontFamily: 'var(--font-display)',
                 fontSize: 17,
@@ -280,7 +280,7 @@ function ValueProps() {
               }}
             >
               {prop.title}
-            </h3>
+            </h2>
             <p
               style={{
                 fontSize: 15,

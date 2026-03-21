@@ -159,19 +159,30 @@ const ChatArea = forwardRef<ChatAreaHandle, ChatAreaProps>(function ChatArea(
         className="p-4"
         style={{ borderTop: "1px solid var(--border)" }}
       >
-        <div className="flex gap-2 items-center">
-          <input
-            type="text"
+        <div className="flex gap-2 items-end">
+          <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              }
+            }}
             placeholder="Ask about your profit..."
             disabled={loading}
-            className="flex-1 rounded-full px-5 py-3 text-sm outline-none"
+            rows={1}
+            className="flex-1 rounded-2xl px-5 py-3 text-sm outline-none resize-none"
             style={{
               backgroundColor: "var(--bg)",
               border: "1px solid var(--border)",
               color: "var(--text-primary)",
               fontFamily: "var(--font-body)",
+              overflow: "hidden",
             }}
           />
           <button

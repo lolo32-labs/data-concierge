@@ -148,17 +148,16 @@ export default function DemoSnapshotPage() {
 
   // ── InsightCard descriptions ────────────────────────────────────────────────
 
-  const topEarnersDescription = (() => {
+  const marginSpreadDescription = (() => {
     if (!topProduct && !bottomProduct) return 'No product data available.';
     const parts: string[] = [];
     if (topProduct) {
       parts.push(
-        `Top earner: ${topProduct.name} at ${topProduct.margin.toFixed(1)}% margin.`
+        `Highest margin: ${topProduct.name} (${topProduct.margin.toFixed(1)}%).`
       );
     }
     if (bottomProduct && bottomProduct.name !== topProduct?.name) {
-      const label = bottomProduct.margin < 0 ? 'losing money' : `${bottomProduct.margin.toFixed(1)}% margin`;
-      parts.push(`Lowest: ${bottomProduct.name} (${label}).`);
+      parts.push(`Lowest margin: ${bottomProduct.name} (${bottomProduct.margin.toFixed(1)}%).`);
     }
     return parts.join(' ');
   })();
@@ -253,8 +252,8 @@ export default function DemoSnapshotPage() {
           }}
         >
           <InsightCard
-            title="Top Earners vs. Money Losers"
-            description={topEarnersDescription}
+            title="Margin Spread"
+            description={marginSpreadDescription}
             ctaLabel="See all products"
             href="/demo/chat?q=Which+products+are+actually+making+me+money%3F"
           />
