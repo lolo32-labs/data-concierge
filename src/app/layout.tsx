@@ -35,16 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=cabinet-grotesk@400,500,700,800&f[]=satoshi@400,500,700&display=swap"
           rel="stylesheet"
         />
-        {/* Geist fonts — preconnect + preload for faster loading */}
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-        <link
-          href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.css"
-          rel="stylesheet"
-        />
-        <link
-          href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.css"
-          rel="stylesheet"
-        />
+        {/* Geist fonts loaded on-demand by terminal theme — system font fallback is fine */}
       </head>
       <body>
         <ThemeProvider>{children}</ThemeProvider>
