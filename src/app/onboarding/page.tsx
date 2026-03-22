@@ -307,7 +307,7 @@ function OnboardingPageInner() {
                     padding: "12px 20px", borderRadius: 6, border: "none",
                     background: "var(--accent-primary)", color: "var(--accent-primary-text)",
                     fontWeight: 600, fontSize: 14, cursor: "pointer",
-                    opacity: shopDomain.includes(".myshopify.com") ? 1 : 0.5,
+                    opacity: shopDomain.includes(".myshopify.com") ? 1 : 0.75,
                     whiteSpace: "nowrap",
                   }}
                 >

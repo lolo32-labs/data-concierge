@@ -87,11 +87,6 @@ export async function computeDashboardMetrics(
       `SELECT COALESCE(SUM(li.quantity * c.cost_per_unit), 0) AS total_cogs
        FROM shopify_order_line_items li
        JOIN shopify_orders o ON o.id = li.order_id
-       LEFT JOIN shopify_product_variants v
-         ON v.shopify_gid = COALESCE(
-           (SELECT shopify_gid FROM shopify_product_variants WHERE id = li.variant_id),
-           ''
-         )
        LEFT JOIN cogs_entries c
          ON c.variant_id = li.variant_id
          AND c.effective_to IS NULL

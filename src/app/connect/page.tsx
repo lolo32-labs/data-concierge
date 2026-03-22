@@ -110,7 +110,7 @@ export default function ConnectPage() {
               fontWeight: 600,
               fontSize: 16,
               cursor: "pointer",
-              opacity: !shopDomain.includes(".myshopify.com") ? 0.6 : 1,
+              opacity: !shopDomain.includes(".myshopify.com") ? 0.75 : 1,
             }}
           >
             Connect & Get Started

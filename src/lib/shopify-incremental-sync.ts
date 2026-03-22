@@ -468,12 +468,23 @@ export async function syncOrdersIncremental(
           const totalDiscount =
             (parseFloat(unitPrice) - parseFloat(discountedPrice)) * li.quantity;
 
+          // Resolve variant Shopify GID to local DB UUID
+          let variantDbId: string | null = null;
+          if (li.variant?.id) {
+            const variantRow = await client.query(
+              "SELECT id FROM shopify_product_variants WHERE store_id = $1 AND shopify_gid = $2",
+              [storeId, li.variant.id]
+            );
+            variantDbId = variantRow.rows[0]?.id || null;
+          }
+
           await client.query(
             `INSERT INTO shopify_order_line_items (
-              store_id, order_id, shopify_gid, product_title, variant_title,
+              store_id, order_id, shopify_gid, variant_id, product_title, variant_title,
               sku, quantity, unit_price, total_discount
-            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
             ON CONFLICT (store_id, shopify_gid) DO UPDATE SET
+              variant_id = COALESCE(EXCLUDED.variant_id, shopify_order_line_items.variant_id),
               quantity = EXCLUDED.quantity,
               unit_price = EXCLUDED.unit_price,
               total_discount = EXCLUDED.total_discount`,
@@ -481,6 +492,7 @@ export async function syncOrdersIncremental(
               storeId,
               orderDbId,
               li.id,
+              variantDbId,
               li.variant?.product?.title || li.title,
               li.title !== "Default Title" ? li.title : null,
               li.variant?.sku || null,

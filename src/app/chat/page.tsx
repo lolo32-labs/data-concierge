@@ -32,6 +32,7 @@ function ChatContent() {
   const [loading, setLoading] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const sendingRef = useRef(false);
 
   // Load chat history
   useEffect(() => {
@@ -64,7 +65,8 @@ function ChatContent() {
   }, [messages]);
 
   async function sendMessage(text: string) {
-    if (!text.trim() || loading) return;
+    if (!text.trim() || loading || sendingRef.current) return;
+    sendingRef.current = true;
 
     const userMsg: Message = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
@@ -80,7 +82,7 @@ function ChatContent() {
       const data = await res.json();
       let content = data.answer || data.error || "Sorry, I couldn't process that.";
       if (data.noStore) {
-        content = "You haven't connected a Shopify store yet. Go to /onboarding to connect your store, or try the demo at /demo/chat to see ProfitSight in action!";
+        content = "You haven't connected a Shopify store yet.\n\n[**Connect Your Store →**](/connect)\n\nOr [try the demo](/demo/chat) to see ProfitSight in action!";
       }
       const assistantMsg: Message = { role: "assistant", content };
       setMessages((prev) => [...prev, assistantMsg]);
@@ -91,6 +93,7 @@ function ChatContent() {
       ]);
     }
     setLoading(false);
+    sendingRef.current = false;
   }
 
   const hasMessages = messages.length > 0;
