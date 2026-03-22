@@ -53,6 +53,7 @@ function OnboardingPageInner() {
   const [step, setStep] = useState<Step>(1);
   const [hasStore, setHasStore] = useState(false);
   const [shopDomain, setShopDomain] = useState("");
+  const [connectError, setConnectError] = useState("");
   const [syncStatus, setSyncStatus] = useState("pending");
   const [orderCount, setOrderCount] = useState(0);
   const [productCount, setProductCount] = useState(0);
@@ -284,7 +285,11 @@ function OnboardingPageInner() {
                 />
                 <button
                   onClick={async () => {
-                    if (!shopDomain.includes(".myshopify.com")) return;
+                    if (!shopDomain.includes(".myshopify.com")) {
+                      setConnectError("Please enter a valid store URL (e.g., yourstore.myshopify.com)");
+                      return;
+                    }
+                    setConnectError("");
                     // Try dev connect first (uses pre-configured token)
                     try {
                       const res = await fetch("/api/shopify/connect-dev", {
@@ -314,6 +319,9 @@ function OnboardingPageInner() {
                   Connect
                 </button>
               </div>
+              {connectError && (
+                <p style={{ fontSize: 13, color: "var(--semantic-error)", marginTop: 8 }}>{connectError}</p>
+              )}
               <p style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 12 }}>
                 We only need read access to your orders and products.
               </p>

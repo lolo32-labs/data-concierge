@@ -97,15 +97,32 @@ function ChatContent() {
   }
 
   const hasMessages = messages.length > 0;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-primary)", color: "var(--text-primary)" }}>
+      {/* Mobile nav bar */}
+      <style>{`
+        .chat-sidebar { display: flex; flex-direction: column; width: 260px; border-right: 1px solid var(--border-primary); padding: 20px; flex-shrink: 0; }
+        .chat-mobile-nav { display: none; }
+        .sidebar-overlay { display: none; }
+        @media (max-width: 768px) {
+          .chat-sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; background: var(--bg-primary); transform: translateX(-100%); transition: transform 0.2s ease; }
+          .chat-sidebar.open { transform: translateX(0); }
+          .chat-mobile-nav { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border-primary); }
+          .sidebar-overlay.open { display: block; position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,0.3); }
+        }
+      `}</style>
+
+      {/* Sidebar overlay (mobile) */}
+      <div className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)} />
+
       {/* Sidebar */}
-      <div style={{ width: 260, borderRight: "1px solid var(--border-primary)", padding: 20, flexShrink: 0 }}>
-        <div style={{ marginBottom: 24 }}>
-          <a href="/dashboard" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: 13 }}>
-            &larr; Dashboard
-          </a>
+      <div className={`chat-sidebar ${sidebarOpen ? "open" : ""}`}>
+        <div style={{ marginBottom: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <a href="/dashboard" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: 13 }}>Dashboard</a>
+          <a href="/chat" style={{ color: "var(--accent-primary)", textDecoration: "none", fontSize: 13, fontWeight: 600 }}>Chat</a>
+          <a href="/settings" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: 13 }}>Settings</a>
         </div>
         <h3 style={{ fontSize: 13, textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: 12, fontWeight: 600 }}>
           Quick Questions
@@ -113,7 +130,7 @@ function ChatContent() {
         {QUICK_QUESTIONS.map((q) => (
           <button
             key={q}
-            onClick={() => sendMessage(q)}
+            onClick={() => { sendMessage(q); setSidebarOpen(false); }}
             disabled={loading}
             style={{
               display: "block", width: "100%", textAlign: "left",
@@ -126,15 +143,18 @@ function ChatContent() {
             {q}
           </button>
         ))}
-        <div style={{ marginTop: 24 }}>
-          <a href="/settings" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: 13 }}>
-            Settings
-          </a>
-        </div>
       </div>
 
       {/* Main chat area */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+        {/* Mobile header */}
+        <div className="chat-mobile-nav">
+          <button onClick={() => setSidebarOpen(true)} style={{ background: "none", border: "1px solid var(--border-primary)", borderRadius: 6, padding: "6px 10px", cursor: "pointer", color: "var(--text-primary)", fontSize: 13 }}>
+            ☰ Questions
+          </button>
+          <a href="/dashboard" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: 13 }}>Dashboard</a>
+          <a href="/settings" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: 13, marginLeft: "auto" }}>Settings</a>
+        </div>
         {/* Messages */}
         <div style={{ flex: 1, overflow: "auto", padding: "24px 32px" }}>
           {!hasMessages && (

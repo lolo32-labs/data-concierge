@@ -134,7 +134,10 @@ export default function DashboardPage() {
               </button>
             ))}
             <a href="/chat" style={{ padding: "6px 12px", borderRadius: 4, background: "var(--bg-secondary)", color: "var(--text-primary)", textDecoration: "none", fontSize: 13 }}>
-              Ask a question
+              Chat
+            </a>
+            <a href="/settings" style={{ padding: "6px 12px", borderRadius: 4, color: "var(--text-secondary)", textDecoration: "none", fontSize: 13 }}>
+              Settings
             </a>
             <a href="/auth/signout" style={{ padding: "6px 12px", borderRadius: 4, color: "var(--text-secondary)", textDecoration: "none", fontSize: 13 }}>
               Sign out

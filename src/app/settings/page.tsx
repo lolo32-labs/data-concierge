@@ -344,18 +344,11 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* Back to dashboard */}
-        <div style={{ marginTop: 24, textAlign: "center" }}>
-          <a
-            href="/dashboard"
-            style={{
-              color: "var(--accent-primary)",
-              fontSize: 14,
-              textDecoration: "none",
-            }}
-          >
-            Back to Dashboard
-          </a>
+        {/* Navigation */}
+        <div style={{ marginTop: 24, display: "flex", justifyContent: "center", gap: 16 }}>
+          <a href="/dashboard" style={{ color: "var(--accent-primary)", fontSize: 14, textDecoration: "none" }}>Dashboard</a>
+          <a href="/chat" style={{ color: "var(--accent-primary)", fontSize: 14, textDecoration: "none" }}>Chat</a>
+          <a href="/auth/signout" style={{ color: "var(--text-secondary)", fontSize: 14, textDecoration: "none" }}>Sign out</a>
         </div>
       </div>
     </div>
