@@ -66,10 +66,14 @@ export async function computeDashboardMetrics(
     // Only include PAID and PARTIALLY_REFUNDED orders
     const validStatuses = "('paid', 'partially_refunded')";
 
-    // 1. Revenue + order count (using current_total_price for post-refund accuracy)
+    // 1. Revenue + order count
+    // Use subtotal_price - total_discounts for true product revenue (excludes shipping pass-through)
+    // Shopify's current_total_price = subtotal + shipping + tax - refunds (NOT discount-adjusted)
     const revenueResult = await client.query(
       `SELECT
-         COALESCE(SUM(current_total_price), 0) AS revenue,
+         COALESCE(SUM(subtotal_price - total_discounts), 0) AS revenue,
+         COALESCE(SUM(total_discounts), 0) AS discounts,
+         COALESCE(SUM(total_shipping), 0) AS shipping,
          COUNT(*) AS order_count,
          COALESCE(SUM(total_refunded), 0) AS total_refunded
        FROM shopify_orders

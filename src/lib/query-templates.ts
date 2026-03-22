@@ -133,7 +133,7 @@ const profitWaterfall: QueryTemplate = {
           COALESCE(SUM(total_tax), 0) AS tax_collected,
           COALESCE(SUM(total_discounts), 0) AS discounts,
           COALESCE(SUM(total_refunded), 0) AS refunds,
-          COALESCE(SUM(current_total_price), 0) AS net_revenue,
+          COALESCE(SUM(subtotal_price - total_discounts), 0) AS net_revenue,
           COUNT(*) AS order_count
         FROM shopify_orders
         WHERE store_id = '${storeId}'
@@ -158,7 +158,7 @@ const profitWaterfall: QueryTemplate = {
       SELECT os.*, ct.total_cogs, at.total_ads
       FROM order_stats os, cogs_total ct, ad_total at`;
   },
-  formatHint: "Present as a detailed waterfall: Gross Revenue → Discounts → Net Revenue → COGS → Shopify Fees (estimate 2.9% + $0.30/order) → Ad Spend → Refunds = Net Profit. Show each line with dollar amounts. Calculate the margin percentage.",
+  formatHint: "Present as a detailed waterfall: Gross Revenue (subtotal_price) → minus Discounts → Net Revenue → minus COGS → minus Shopify Fees (estimate 2.9% of net_revenue + $0.30/order) → minus Ad Spend → minus Refunds = Net Profit. Show each line with dollar amounts. Calculate the margin percentage. Note: shipping_collected is pass-through, not profit.",
 };
 
 // ── Template Registry ───────────────────────────────────────────────
