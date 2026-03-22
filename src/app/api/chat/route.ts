@@ -24,23 +24,38 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Step 1: Classify intent
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: { temperature: 0 } });
-    const classifyResult = await model.generateContent(CLASSIFY_PROMPT + message);
-    const classifyText = classifyResult.response.text().trim();
 
+    // Step 1: Classify intent — keyword pre-match first, then Gemini fallback
     let intent = "freeform";
     let params: Record<string, string> = { days: "30" };
     let confidence = 0;
 
-    try {
-      const cleaned = classifyText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      const parsed = JSON.parse(cleaned);
-      intent = parsed.intent || "freeform";
-      params = parsed.params || { days: "30" };
-      confidence = parsed.confidence || 0;
-    } catch {
-      // Classification failed — fall back to freeform
+    // Fast keyword matching for the 5 killer questions (bypasses unreliable LLM classifier)
+    const lowerMsg = message.toLowerCase();
+    if (lowerMsg.includes("profit") && (lowerMsg.includes("month") || lowerMsg.includes("real") || lowerMsg.includes("total") || lowerMsg.includes("net"))) {
+      intent = "profit_waterfall"; confidence = 0.95; // Use waterfall for complete answer (revenue, COGS, fees, ad spend)
+    } else if (lowerMsg.includes("product") && (lowerMsg.includes("money") || lowerMsg.includes("profit") || lowerMsg.includes("margin") || lowerMsg.includes("making") || lowerMsg.includes("selling"))) {
+      intent = "product_profitability"; confidence = 0.95;
+    } else if (lowerMsg.includes("ad") && (lowerMsg.includes("spend") || lowerMsg.includes("roas") || lowerMsg.includes("performing") || lowerMsg.includes("return"))) {
+      intent = "ad_spend_roas"; confidence = 0.95;
+    } else if (lowerMsg.includes("channel") || lowerMsg.includes("source")) {
+      intent = "channel_margins"; confidence = 0.95;
+    } else if (lowerMsg.includes("waterfall") || lowerMsg.includes("breakdown") || lowerMsg.includes("break down")) {
+      intent = "profit_waterfall"; confidence = 0.95;
+    } else {
+      // Gemini classifier for ambiguous questions
+      try {
+        const classifyResult = await model.generateContent(CLASSIFY_PROMPT + message);
+        const classifyText = classifyResult.response.text().trim();
+        const cleaned = classifyText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        const parsed = JSON.parse(cleaned);
+        intent = parsed.intent || "freeform";
+        params = parsed.params || { days: "30" };
+        confidence = parsed.confidence || 0;
+      } catch {
+        // Classification failed — fall back to freeform
+      }
     }
 
     // Step 2: Execute query
@@ -49,7 +64,7 @@ export async function POST(request: Request) {
     let templateUsed = "";
 
     const template = TEMPLATE_MAP.get(intent);
-    if (template && confidence >= 0.3) {
+    if (template && confidence >= 0.2) {
       templateUsed = template.id;
       const sql = template.buildQuery(storeId, params);
       sqlExecuted = sql;
@@ -60,7 +75,7 @@ export async function POST(request: Request) {
       // Freeform fallback: use Gemini to generate SQL
       const schemaContext = `Tables available (all filtered by store_id='${storeId}'):
 - shopify_orders: shopify_gid, order_number, created_at_shopify, financial_status (paid/partially_refunded/refunded/pending/voided), currency, subtotal_price, total_shipping, total_tax, total_discounts, total_refunded, current_total_price, channel_name
-- shopify_order_line_items: order_id, shopify_gid, product_title, variant_title, sku, quantity, unit_price, total_discount
+- shopify_order_line_items: order_id, variant_id (FK to shopify_product_variants.id), shopify_gid, product_title, variant_title, sku, quantity, unit_price, total_discount
 - shopify_products: shopify_gid, title, product_type, vendor, status
 - shopify_product_variants: product_id, shopify_gid, title, sku, price, compare_at_price, inventory_quantity
 - cogs_entries: variant_id, cost_per_unit, effective_from, effective_to (NULL=current), source
