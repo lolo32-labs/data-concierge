@@ -17,7 +17,7 @@ export async function GET() {
   }
 
   const result = await pool.query(
-    `SELECT s.sync_status, s.last_sync_at, s.shop_name,
+    `SELECT s.sync_status, s.last_sync_at, s.store_name,
        (SELECT COUNT(*) FROM shopify_orders WHERE store_id = $1)::int AS order_count,
        (SELECT COUNT(*) FROM shopify_products WHERE store_id = $1)::int AS product_count,
        (SELECT COUNT(*) FROM shopify_product_variants WHERE store_id = $1)::int AS variant_count,
@@ -34,7 +34,7 @@ export async function GET() {
   return NextResponse.json({
     syncStatus: store.sync_status,
     lastSyncAt: store.last_sync_at,
-    shopName: store.shop_name,
+    shopName: store.store_name,
     productCount: store.product_count,
     variantCount: store.variant_count,
     orderCount: store.order_count,

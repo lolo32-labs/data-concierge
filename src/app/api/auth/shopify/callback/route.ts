@@ -142,7 +142,16 @@ export async function GET(request: Request) {
   try {
     await client.query("BEGIN");
 
-    if (isNewInstall || !userId) {
+    // Verify userId still exists (could be stale from a DB wipe or old cookie)
+    if (userId) {
+      const userCheck = await client.query("SELECT id FROM users WHERE id = $1", [userId]);
+      if (userCheck.rows.length === 0) {
+        console.log("CALLBACK: stale userId", userId, "- treating as new install");
+        userId = null;
+      }
+    }
+
+    if (!userId) {
       // Auto-create (or find) a user account using the Shopify store email
       if (!shopEmail) {
         // Fallback: use shop domain as email
@@ -172,8 +181,10 @@ export async function GET(request: Request) {
           [shopEmail, shopName, passwordHash]
         );
         userId = newUser.rows[0].id;
+        console.log("CALLBACK DEBUG: Created new user:", userId);
       }
     }
+    console.log("CALLBACK DEBUG: Final userId before store insert:", userId);
 
     // ── Create or update store + token in DB ──────────────────────────
 
@@ -215,7 +226,7 @@ export async function GET(request: Request) {
 
     // ── Redirect ────────────────────────────────────────────────────
 
-    if (isNewInstall && tempPassword && shopEmail) {
+    if (tempPassword && shopEmail) {
       // Set auto-signin cookie so the redirect page can sign in the new user
       const response = NextResponse.redirect(
         `${baseUrl}/onboarding?store=${storeId}&newInstall=1`

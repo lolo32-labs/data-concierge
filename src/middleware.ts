@@ -5,7 +5,13 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, searchParams } = request.nextUrl;
+
+  // Allow /onboarding when coming from OAuth (has auto-signin cookie)
+  if (pathname.startsWith("/onboarding") &&
+      (searchParams.get("newInstall") === "1" || request.cookies.get("ps_auto_signin"))) {
+    return NextResponse.next();
+  }
 
   // Check for Auth.js session token cookie
   const sessionToken =

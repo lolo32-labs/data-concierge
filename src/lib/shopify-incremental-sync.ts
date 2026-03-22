@@ -147,8 +147,8 @@ export async function syncShopInfo(storeId: string): Promise<void> {
 
   await pool.query(
     `UPDATE stores SET
-       shop_name = $2,
-       shop_plan = $3,
+       store_name = $2,
+       shopify_plan = $3,
        currency = $4,
        updated_at = now()
      WHERE id = $1`,

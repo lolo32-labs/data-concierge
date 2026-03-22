@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import MessageBubble from "@/components/message-bubble";
 
 interface Message {
   role: "user" | "assistant";
@@ -162,29 +163,7 @@ function ChatContent() {
           )}
 
           {messages.map((msg, i) => (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-                marginBottom: 16,
-              }}
-            >
-              <div
-                style={{
-                  maxWidth: "70%",
-                  padding: "12px 16px",
-                  borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                  background: msg.role === "user" ? "var(--accent-primary)" : "var(--bg-secondary)",
-                  color: msg.role === "user" ? "var(--accent-primary-text)" : "var(--text-primary)",
-                  fontSize: 14,
-                  lineHeight: 1.6,
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {msg.content}
-              </div>
-            </div>
+            <MessageBubble key={i} role={msg.role} content={msg.content} />
           ))}
 
           {loading && (

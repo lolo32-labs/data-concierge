@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
   try {
     // Step 1: Classify intent
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: { temperature: 0 } });
     const classifyResult = await model.generateContent(CLASSIFY_PROMPT + message);
     const classifyText = classifyResult.response.text().trim();
 

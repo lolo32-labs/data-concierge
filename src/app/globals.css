@@ -48,6 +48,18 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
+
+  /* Aliases for authenticated pages (dashboard, chat, settings, onboarding) */
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--surface);
+  --text-primary: var(--text-primary);
+  --text-secondary: var(--text-secondary);
+  --border-primary: var(--border);
+  --accent-primary: var(--brand-primary);
+  --accent-primary-text: var(--text-inverse);
+  --semantic-success: var(--color-success);
+  --semantic-error: var(--color-danger);
+  --semantic-warning: var(--color-warning);
 }
 
 /* --- Midnight Theme (Deep Sky + Warm Glow) --- */
