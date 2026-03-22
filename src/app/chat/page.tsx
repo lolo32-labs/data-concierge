@@ -156,7 +156,7 @@ function ChatContent() {
           <a href="/settings" style={{ color: "var(--text-secondary)", textDecoration: "none", fontSize: 13, marginLeft: "auto" }}>Settings</a>
         </div>
         {/* Messages */}
-        <div style={{ flex: 1, overflow: "auto", padding: "24px 32px" }}>
+        <div style={{ flex: 1, overflow: "auto", padding: "24px 16px" }}>
           {!hasMessages && (
             <div style={{ textAlign: "center", marginTop: 80 }}>
               <h2 style={{ fontSize: 22, fontWeight: 600, marginBottom: 8 }}>
@@ -166,7 +166,7 @@ function ChatContent() {
                 Ask about your profits, products, ad spend, or channels.
               </p>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
-                {QUICK_QUESTIONS.slice(0, 3).map((q) => (
+                {QUICK_QUESTIONS.map((q) => (
                   <button
                     key={q}
                     onClick={() => sendMessage(q)}
@@ -214,7 +214,7 @@ function ChatContent() {
         </div>
 
         {/* Input */}
-        <div style={{ padding: "16px 32px", borderTop: "1px solid var(--border-primary)" }}>
+        <div style={{ padding: "16px", borderTop: "1px solid var(--border-primary)" }}>
           <form
             onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
             style={{ display: "flex", gap: 8 }}

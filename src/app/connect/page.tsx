@@ -121,34 +121,12 @@ export default function ConnectPage() {
           </p>
 
           {/* Secondary path: OAuth install */}
-          <div
-            style={{
-              marginTop: 20,
-              paddingTop: 20,
-              borderTop: "1px solid var(--border, #e5e5e5)",
-            }}
-          >
-            <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 10 }}>
-              Or install directly from Shopify
-            </p>
-            <a
-              href="/install"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                padding: "10px 20px",
-                borderRadius: 8,
-                border: "1px solid var(--border, #e5e5e5)",
-                background: "transparent",
-                color: "var(--text-primary)",
-                fontWeight: 500,
-                fontSize: 14,
-                textDecoration: "none",
-              }}
-            >
-              Install via Shopify
+          <p style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 16 }}>
+            Don&apos;t know your store URL?{" "}
+            <a href="/install" style={{ color: "var(--brand-primary)", textDecoration: "none" }}>
+              Install from Shopify instead
             </a>
-          </div>
+          </p>
         </div>
 
         <div style={{ marginTop: 24, fontSize: 14, color: "var(--text-secondary)" }}>

@@ -116,9 +116,9 @@ export default function DashboardPage() {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <h1 style={{ fontSize: 24, fontWeight: 700 }}>Dashboard</h1>
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            {/* Period selector */}
-            {[7, 30, 90].map((d) => (
+          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+            {/* Period selector — only show when we have data */}
+            {metrics && [7, 30, 90].map((d) => (
               <button
                 key={d}
                 onClick={() => setPeriod(d)}
